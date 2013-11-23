@@ -17,19 +17,13 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 3.		Press Ctrl+Shift+B				to BUILD (COMPILE+LINK)
 4.		Press Ctrl+F5					to EXECUTE
 ===================================================================================*/
-#define _USE_MATH_DEFINES
-#include<iostream>
-#include<GL/glut.h>				// include GLUT library
-#include<cmath>
-#include<stdio.h>
-#include<string>
-#include<sstream>
-#include<fstream>
-#include"hwProject\hwProject\SOIL.h"
 
-using namespace std;
+#include "helpers.h"
+#include "picture.h"
 
 #define editor_title "3D Mobile"
+
+picture* mypic[3];
 
 static bool spinning = true;
 static const int FPS = 60;
@@ -38,16 +32,16 @@ static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
 int picCount = 3;
 GLuint textures[3];
 
-string load_me[3] = { "bard.jpg",
-					  "batoro.png",
-					   "sette.jpg"};
+string load_me[3] = { "C:\\temp\\project\\pics\\samp\\bard.jpg",
+					  "C:\\temp\\project\\pics\\samp\\batoro.png",
+					   "C:\\temp\\project\\pics\\samp\\sette.jpg"};
 
 using namespace std;
 int height = 600,
 	width  = 600,
 	depth = 600;
 
-double distanceMultiplier = 3;
+double distanceMultiplier = 5;
 
 int globalX, globalY;
 double angle = 0;
@@ -58,24 +52,14 @@ bool hideHelp = true,
 	 hideCoord = true,
 	 tracking = false;
 
-double camera[9] =  {0, 0, depth*distanceMultiplier*1.5, 0, 0, 0, 0, 1, 0};
+double camera[9] =  {0, 500, depth*distanceMultiplier*1.5, 0, 0, 0, 0, 1, 0};
 
 float pictures [4][6] = { 100, 100, width + 20, 1, width-100, 1,
 						  100, 100, width + 700, 2, 200, 1,
 						  100, 100, width + 300, 1, -100, -1,
 						  50,  50, width, 1, -width/2, 1 };
 
-void renderBitmapString(double x, double y, void *font, string str) {
-	glRasterPos2d(x,y);
-	for (string::iterator c = (&str)->begin(); c != (&str)->end(); ++c) 
-		glutBitmapCharacter(font, *c);
-}
-
-void renderPictures(float x, float y, float z, 
-					float angle, float verse,
-					float transX, float transY, float transZ,
-					GLuint pic_index) {
-
+void renderPictures(float x, float y, float z, float angle, float verse, float transX, float transY, float transZ, GLuint pic_index) {
 	if (pic_index > 0) {
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, pic_index);
@@ -96,54 +80,6 @@ void renderPictures(float x, float y, float z,
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
 }
-
-void coordinates() {
-	glLineWidth(1);
-	glBegin(GL_LINES);
-		// X coordinate line
-		glColor3f(0, 0, 1);
-		glVertex3f(-width+50, 0, 0);
-		glVertex3f(width-50, 0, 0);
-
-		glVertex3f(width-50, 0, 0);
-		glVertex3f(width-54, 3, 0);
-
-		glVertex3f(width-50, 0, 0);
-		glVertex3f(width-54, -3, 0);
-
-		// Y coordinate line
-		glColor3f(1, 0, 0);
-		glVertex3f(0, -height+50, 0);
-		glVertex3f(0, height-50, 0);
-
-		glVertex3f(0, height-50, 0);
-		glVertex3f(3, height-54, 0);
-
-		glVertex3f(0, height-50, 0);
-		glVertex3f(-3, height-54, 0);
-
-		// Z coordinate line
-		glColor3f(0, 1, 0);
-		glVertex3f(0, 0, -depth+50);
-		glVertex3f(0, 0, depth-50);
-
-		glVertex3f(0, 0, depth-50);
-		glVertex3f(0, 3, depth-54);
-
-		glVertex3f(0, 0, depth-50);
-		glVertex3f(0, -3, depth-54);
-	glEnd();
-	glColor3f(0, 0, 1);
-	glRasterPos3f(width-35, 0, 0);
-	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, 'X');
-	glColor3f(1, 0, 0);
-	glRasterPos3f(0, height-35, 0);
-	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, 'Y');
-	glColor3f(0, 1, 0);
-	glRasterPos3f(0, 0, depth-35);
-	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, 'Z');
-}
-
 void resetCamera() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -154,7 +90,6 @@ void resetCamera() {
 		      camera[3], camera[4], camera[5], 
 			  camera[6], camera[7], camera[8]);
 }
-
 void cameraTrack() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -173,10 +108,7 @@ void cameraTrack() {
 		      camera[3], camera[4], camera[5], 
 			  camera[6], camera[7], camera[8]);
 }
-
-void highlightPicture(float x, float y, float z, 
-					  float angle, float verse,
-					  float transX, float transY, float transZ) {
+void highlightPicture(float x, float y, float z, float angle, float verse, float transX, float transY, float transZ) {
 	glPushMatrix();
 	glRotatef(angle*verse, 0.0, 1.0, 0.0);
 	glTranslatef(transX, transY, transZ);
@@ -184,34 +116,37 @@ void highlightPicture(float x, float y, float z,
 	glLineWidth(5);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_POLYGON);
-		glVertex3f(x+1, y+1, z);
-		
+		glVertex3f(x+1, y+1, z);	
 	    glVertex3f(-x-1, y+1, z);
-
 		glVertex3f(-x-1, -y-1, z);
-
 		glVertex3f(x+1, -y-1, z);
 	glEnd();
 	glPopMatrix();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
-
 void redraw(){
 	if (!hideCoord)
-		coordinates();
-	for (int i = 0; i < 4; i++) {
-		renderPictures(pictures[i][0], pictures[i][1], pictures[i][2], 
-					   currentAngleOfRotation[i], pictures[i][5],
-					   0, pictures[i][4], 0, 
-					   textures[i%picCount]);
+		coordinates(500);
+	for (int i = 0; i < 3; i++) {
+		//old method
+		//renderPictures(pictures[i][0], pictures[i][1], pictures[i][2], 
+		//			   currentAngleOfRotation[i], pictures[i][5],
+		//			   0, pictures[i][4], 0, 
+		//			   textures[i%picCount]);
+
+		//new method
+		mypic[i]->display(pictures[i][0], pictures[i][1], pictures[i][2], 
+				currentAngleOfRotation[i], pictures[i][5],
+				0, pictures[i][4], 0);
+
 		if (i == followPicIndex) {
 			highlightPicture(pictures[i][0], pictures[i][1], pictures[i][2], 
 							 currentAngleOfRotation[i], pictures[i][5],
 							 0, pictures[i][4], 0);
 		}
 	}
-}
 
+}
 void myDisplayCallback(){
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -221,18 +156,19 @@ void myDisplayCallback(){
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	redraw();
+
+	coordinates(500);
+	//mypic[0]->display(90.0, 0.0, 0.0, 0.0);
+
 	glFlush();
 	glutSwapBuffers();
 }
-
 void translate(double x, double y) {
 	myDisplayCallback();
 }
-
 void rotate(double rads) {
 	myDisplayCallback();
 }
-
 void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 	switch (key) {
 		case '1': followPicIndex = 0;
@@ -256,14 +192,12 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 		default: break;
 	}
 }
-
 void mouseCallback(int buttonName, int state, int cursorX, int cursorY) {
 	if (buttonName == GLUT_LEFT_BUTTON && state == GLUT_UP && followPicIndex != -1) {
 		tracking = !tracking;
 		if (!tracking) resetCamera();
 	}
 }
-
 void myInit(){
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
@@ -273,7 +207,6 @@ void myInit(){
 		      camera[3], camera[4], camera[5], 
 			  camera[6], camera[7], camera[8]);
 }
-
 void timer(int v) {
   if (spinning) {
 	for (int i = 0; i < 4; i++) {
@@ -286,51 +219,42 @@ void timer(int v) {
   }
   glutTimerFunc(1000/FPS, timer, v);
 }
-
 void passiveMove(int cursorX, int cursorY) {
 	// No use yet
 }
-
 void mouseMovement(int cursorX, int cursorY) {
 	// No use yet
 }
-
-GLuint loadTextures(string filename) {
-	GLuint tex_ID = SOIL_load_OGL_texture(filename.c_str(), 
-										  SOIL_LOAD_AUTO,
-										  SOIL_CREATE_NEW_ID, 
-										  SOIL_FLAG_POWER_OF_TWO
-										  | SOIL_FLAG_DDS_LOAD_DIRECT);
-	return tex_ID;
-}
-
 void loadImages() {
 	cout << "Loading images...\n";
 	glGenTextures(picCount, textures);
 	for (int i = 0; i < picCount; i++) {
-		textures[i] = loadTextures(load_me[i].c_str());
+		textures[i] = loadTexture(load_me[i].c_str());
 
-		if (textures[i] > 0) 
-			cout << "Image: " << load_me[i].c_str() << " successfully loaded.\n";
-		else 
-			cout << "Failure: " << load_me[i].c_str() << " : " << textures[i] << "\n";
-		
 		if (textures[i] > 0) {
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, textures[i]);
 			pictures[i][0] = GL_TEXTURE_WIDTH/width*100;
 			pictures[i][1] = GL_TEXTURE_HEIGHT/height*100;
-		} else glDisable(GL_TEXTURE_2D);
+			cout << "Image: " << load_me[i].c_str() << " successfully loaded.\n";
+		} else {
+			cout << "Failure: " << load_me[i].c_str() << " : " << textures[i] << "\n";
+			glDisable(GL_TEXTURE_2D);
+		}
+
+		//if (textures[i] > 0) {
+		//	glEnable(GL_TEXTURE_2D);
+		//	glBindTexture(GL_TEXTURE_2D, textures[i]);
+		//	pictures[i][0] = GL_TEXTURE_WIDTH/width*100;
+		//	pictures[i][1] = GL_TEXTURE_HEIGHT/height*100;
+		//} else glDisable(GL_TEXTURE_2D);
 
 		
 	}
 	cout << "Images loaded.\n";
 }
-
 void main(int argc, char ** argv){
 	glutInit(& argc, argv);
-
-	
 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
@@ -338,7 +262,10 @@ void main(int argc, char ** argv){
 	glutCreateWindow(editor_title);	// create a titled window
 	myInit();									// setting up
 	
-	loadImages();
+	//loadImages();
+	mypic[0] = new picture("C:\\temp\\project\\pics\\samp\\bard.jpg");
+	mypic[1] = new picture("C:\\temp\\project\\pics\\samp\\batoro.png");
+	mypic[2] = new picture("C:\\temp\\project\\pics\\samp\\sette.jpg");
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback
