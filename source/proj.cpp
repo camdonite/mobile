@@ -24,9 +24,10 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #define editor_title "3D Mobile"
 
 picture* mypic[3];
+double myangle = 0;
 
 static bool spinning = true;
-static const int FPS = 60;
+static const int FPS = 5;
 static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
 
 int picCount = 3;
@@ -52,34 +53,13 @@ bool hideHelp = true,
 	 hideCoord = true,
 	 tracking = false;
 
-double camera[9] =  {0, 500, depth*distanceMultiplier*1.5, 0, 0, 0, 0, 1, 0};
+double camera[9] =  {0, 0, depth*distanceMultiplier*1.5, 0, 0, 0, 0, 1, 0};
 
 float pictures [4][6] = { 100, 100, width + 20, 1, width-100, 1,
 						  100, 100, width + 700, 2, 200, 1,
 						  100, 100, width + 300, 1, -100, -1,
 						  50,  50, width, 1, -width/2, 1 };
 
-void renderPictures(float x, float y, float z, float angle, float verse, float transX, float transY, float transZ, GLuint pic_index) {
-	if (pic_index > 0) {
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, pic_index);
-	} else glDisable(GL_TEXTURE_2D);
-	glPushMatrix();
-	glRotatef(angle*verse, 0.0, 1.0, 0.0);
-	glTranslatef(transX, transY, transZ);
-	glColor3f(1, 1, 1);
-	glBegin(GL_QUADS);
-		glTexCoord2f(1.0f, 0.0f); glVertex3f(x, y, z);
-		
-	    glTexCoord2f(0.0f, 0.0f); glVertex3f(-x, y, z);
-
-		glTexCoord2f(0.0f, 1.0f); glVertex3f(-x, -y, z);
-
-		glTexCoord2f(1.0f, 1.0f); glVertex3f(x, -y, z);
-	glEnd();
-	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
-}
 void resetCamera() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -135,9 +115,9 @@ void redraw(){
 		//			   textures[i%picCount]);
 
 		//new method
-		mypic[i]->display(pictures[i][0], pictures[i][1], pictures[i][2], 
-				currentAngleOfRotation[i], pictures[i][5],
-				0, pictures[i][4], 0);
+		//mypic[i]->display(pictures[i][0], pictures[i][1], pictures[i][2], 
+		//		currentAngleOfRotation[i], pictures[i][5],
+		//		0, pictures[i][4], 0);
 
 		if (i == followPicIndex) {
 			highlightPicture(pictures[i][0], pictures[i][1], pictures[i][2], 
@@ -155,10 +135,13 @@ void myDisplayCallback(){
 	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	redraw();
+	//redraw();
 
+	myangle += 5;
+	if (myangle > 360) myangle = 1;
 	coordinates(500);
-	//mypic[0]->display(90.0, 0.0, 0.0, 0.0);
+
+	mypic[0]->display(1000.0, 0.0, 1000.0, myangle);
 
 	glFlush();
 	glutSwapBuffers();
@@ -235,6 +218,7 @@ void loadImages() {
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, textures[i]);
 			pictures[i][0] = GL_TEXTURE_WIDTH/width*100;
+			cout << "gltexturewidth" << pictures[i][0] << "\n";
 			pictures[i][1] = GL_TEXTURE_HEIGHT/height*100;
 			cout << "Image: " << load_me[i].c_str() << " successfully loaded.\n";
 		} else {
@@ -263,9 +247,9 @@ void main(int argc, char ** argv){
 	myInit();									// setting up
 	
 	//loadImages();
-	mypic[0] = new picture("C:\\temp\\project\\pics\\samp\\bard.jpg");
-	mypic[1] = new picture("C:\\temp\\project\\pics\\samp\\batoro.png");
-	mypic[2] = new picture("C:\\temp\\project\\pics\\samp\\sette.jpg");
+	mypic[0] = new picture("C:\\temp\\project\\pics\\samp\\bard.jpg", 600, 600, "bard");
+	mypic[1] = new picture("C:\\temp\\project\\pics\\samp\\batoro.png", 600, 600, "toot", "lamb");
+	mypic[2] = new picture("C:\\temp\\project\\pics\\samp\\sette.jpg", 600, 600, "ramble", "sauce");
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback
