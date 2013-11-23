@@ -1,4 +1,4 @@
-
+//see helpers.h for comments
 #include "helpers.h"
 
 double toRadian(double in){
@@ -22,7 +22,7 @@ void renderBitmapString(double x, double y, void *font, string str) {
 	int newlines = 1;
 	glRasterPos2d(x,y);
 	for (string::iterator c = (&str)->begin(); c != (&str)->end(); ++c) {
-		if (*c == '\n') {
+		if (*c == '\n' || *c == '|') { 
 			glRasterPos2d(x,y + (newlines * 15));
 			newlines ++;
 		}else{

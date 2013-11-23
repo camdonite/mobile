@@ -1,5 +1,12 @@
+/* Provides helper functions and global defines
+ *
+ */
+
 #ifndef HELPERS_H
 #define HELPERS_H
+
+#define DEBUG
+
 #define _USE_MATH_DEFINES
 using namespace std;
 #include <iostream>

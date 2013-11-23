@@ -80,3 +80,20 @@ void picture::display(float x, float y, float z, float angle, float verse, float
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
 }
+
+void highlightPicture(float x, float y, float z, float angle, float verse, float transX, float transY, float transZ) {
+	glPushMatrix();
+	glRotatef(angle*verse, 0.0, 1.0, 0.0);
+	glTranslatef(transX, transY, transZ);
+	glColor3f(1, 1, 0);
+	glLineWidth(5);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_POLYGON);
+		glVertex3f(x+1, y+1, z);	
+	    glVertex3f(-x-1, y+1, z);
+		glVertex3f(-x-1, -y-1, z);
+		glVertex3f(x+1, -y-1, z);
+	glEnd();
+	glPopMatrix();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}

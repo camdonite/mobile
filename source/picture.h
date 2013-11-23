@@ -5,6 +5,11 @@
 #define DEFAULT_DESCRIPTION "no description"
 
 class picture{
+	/* This class provides storage and operations for each image.
+	 * The constructor creates a picture object, and loads the image from the file
+	 * display(x, y, z, angle, [selected]) renders the image on the screen at the coords
+	 * and rotated at the specifyed angle(about it's own center)
+	 */
 private:
 	string name;
 	string description;
@@ -13,7 +18,7 @@ private:
 
 	float texWidth;
 	float texHeight;
-	GLuint texture[1];
+	GLuint texture;
 	bool loaded;
 public:
 	GLfloat width;
@@ -23,6 +28,6 @@ public:
 	//picture(string filename, GLfloat width, GLfloat height);
 	//picture(string filename, string name, string description); //filename, name, description
 	picture(string filename, GLfloat width, GLfloat height, string name = DEFAULT_NAME, string description = DEFAULT_DESCRIPTION);
-	void display(GLfloat, GLfloat, GLfloat, GLfloat);
+	void display(GLfloat, GLfloat, GLfloat, GLfloat, bool highlighted = false);
 	//void display(float, float, float, float, float, float, float, float);
 };

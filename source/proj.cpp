@@ -1,13 +1,13 @@
 /*===================================================================================
 Zach Hudson
 Folder: Hudson923
-Project Sampler
+Term Project
 
-PROGRAMMER:				Zach Hudson
+PROGRAMMER:				Zach Hudson and Chase Coates
 PATH:					
 COURSE:					CSC 525/625
-LAST MODIFIED DATE:		Nov. 12, 2013
-DESCRIPTION:			Demo: 3D Mobile sampler using SOIL
+LAST MODIFIED DATE:		Nov. 22, 2013
+DESCRIPTION:			3D Mobile
 NOTE:					N/A
 FILES:					proj.cpp, (hwProject.sln, ...)
 IDE/COMPILER:			MicroSoft Visual Studio 2012
@@ -22,20 +22,22 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #include "picture.h"
 
 #define editor_title "3D Mobile"
+#define DEFAULT_MANIFEST "C:\\temp\\project\\manifest.txt"
 
-picture* mypic[3];
+picture* pics[300];
+int picCount = 0;
 double myangle = 0;
 
 static bool spinning = true;
 static const int FPS = 5;
 static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
 
-int picCount = 3;
-GLuint textures[3];
-
-string load_me[3] = { "C:\\temp\\project\\pics\\samp\\bard.jpg",
-					  "C:\\temp\\project\\pics\\samp\\batoro.png",
-					   "C:\\temp\\project\\pics\\samp\\sette.jpg"};
+//int picCount = 3;
+//GLuint textures[3];
+//
+//string load_me[3] = { "C:\\temp\\project\\pics\\samp\\bard.jpg",
+//					  "C:\\temp\\project\\pics\\samp\\batoro.png",
+//					   "C:\\temp\\project\\pics\\samp\\sette.jpg"};
 
 using namespace std;
 int height = 600,
@@ -88,22 +90,6 @@ void cameraTrack() {
 		      camera[3], camera[4], camera[5], 
 			  camera[6], camera[7], camera[8]);
 }
-void highlightPicture(float x, float y, float z, float angle, float verse, float transX, float transY, float transZ) {
-	glPushMatrix();
-	glRotatef(angle*verse, 0.0, 1.0, 0.0);
-	glTranslatef(transX, transY, transZ);
-	glColor3f(1, 1, 0);
-	glLineWidth(5);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glBegin(GL_POLYGON);
-		glVertex3f(x+1, y+1, z);	
-	    glVertex3f(-x-1, y+1, z);
-		glVertex3f(-x-1, -y-1, z);
-		glVertex3f(x+1, -y-1, z);
-	glEnd();
-	glPopMatrix();
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
 void redraw(){
 	if (!hideCoord)
 		coordinates(500);
@@ -119,11 +105,11 @@ void redraw(){
 		//		currentAngleOfRotation[i], pictures[i][5],
 		//		0, pictures[i][4], 0);
 
-		if (i == followPicIndex) {
-			highlightPicture(pictures[i][0], pictures[i][1], pictures[i][2], 
-							 currentAngleOfRotation[i], pictures[i][5],
-							 0, pictures[i][4], 0);
-		}
+		//if (i == followPicIndex) {
+		//	highlightPicture(pictures[i][0], pictures[i][1], pictures[i][2], 
+		//					 currentAngleOfRotation[i], pictures[i][5],
+		//					 0, pictures[i][4], 0);
+		//}
 	}
 
 }
@@ -141,7 +127,7 @@ void myDisplayCallback(){
 	if (myangle > 360) myangle = 1;
 	coordinates(500);
 
-	mypic[0]->display(1000.0, 0.0, 1000.0, myangle);
+	pics[0]->display(1000.0, 0.0, 1000.0, myangle);
 
 	glFlush();
 	glutSwapBuffers();
@@ -208,34 +194,40 @@ void passiveMove(int cursorX, int cursorY) {
 void mouseMovement(int cursorX, int cursorY) {
 	// No use yet
 }
-void loadImages() {
-	cout << "Loading images...\n";
-	glGenTextures(picCount, textures);
-	for (int i = 0; i < picCount; i++) {
-		textures[i] = loadTexture(load_me[i].c_str());
+void loadManifest(const char* manifestFilename){
+	/* Loads the configuration data from the manifest file. 
+	 * See example manifest.txt for more deets
+	 * manifestFilename : filename of the config file
+	 * NOTES: This whole thing could be better.
+	 */
 
-		if (textures[i] > 0) {
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, textures[i]);
-			pictures[i][0] = GL_TEXTURE_WIDTH/width*100;
-			cout << "gltexturewidth" << pictures[i][0] << "\n";
-			pictures[i][1] = GL_TEXTURE_HEIGHT/height*100;
-			cout << "Image: " << load_me[i].c_str() << " successfully loaded.\n";
-		} else {
-			cout << "Failure: " << load_me[i].c_str() << " : " << textures[i] << "\n";
-			glDisable(GL_TEXTURE_2D);
+	//known bug: will crash if comment is at the end
+	ifstream file;
+	file.open(manifestFilename);
+	string filename;
+	GLfloat width;
+	GLfloat height;
+	string name;
+	string description;
+	string token;
+	while (!file.eof()) {
+		file>>token;
+		if (token == "/*") {
+			//itereate over comments
+			while (true){
+				file>>token;
+				if (token == "*/") break;
+			}
+			file>>token;
 		}
-
-		//if (textures[i] > 0) {
-		//	glEnable(GL_TEXTURE_2D);
-		//	glBindTexture(GL_TEXTURE_2D, textures[i]);
-		//	pictures[i][0] = GL_TEXTURE_WIDTH/width*100;
-		//	pictures[i][1] = GL_TEXTURE_HEIGHT/height*100;
-		//} else glDisable(GL_TEXTURE_2D);
-
-		
+		filename = token;
+		file>>width>>height>>name>>description;
+#ifdef DEBUG
+		cout<<"->IDX:"<<picCount<<"FN:"<<filename<<" W:"<<width<<" H:"<<height<<" NAME:"<<name<<" DESCRIPTION:"<<description<<"\n"; //debug
+#endif
+		pics[picCount] = new picture(filename, width, height, name, description);
+		picCount ++;
 	}
-	cout << "Images loaded.\n";
 }
 void main(int argc, char ** argv){
 	glutInit(& argc, argv);
@@ -246,14 +238,16 @@ void main(int argc, char ** argv){
 	glutCreateWindow(editor_title);	// create a titled window
 	myInit();									// setting up
 	
-	//loadImages();
-	mypic[0] = new picture("C:\\temp\\project\\pics\\samp\\bard.jpg", 600, 600, "bard");
-	mypic[1] = new picture("C:\\temp\\project\\pics\\samp\\batoro.png", 600, 600, "toot", "lamb");
-	mypic[2] = new picture("C:\\temp\\project\\pics\\samp\\sette.jpg", 600, 600, "ramble", "sauce");
+	if (argc < 2) {
+		//no command line parameters given
+		loadManifest(DEFAULT_MANIFEST);
+	} else {
+		loadManifest(argv[1]);
+	}
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback
-	glutTimerFunc(100, timer, 0);
+	//glutTimerFunc(100, timer, 0);
 	
 	glutMouseFunc(mouseCallback);
 	glutMotionFunc(mouseMovement);
