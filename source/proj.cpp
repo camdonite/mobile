@@ -42,6 +42,23 @@ GLfloat random(){
 	return out;
 }
 
+struct mouseClick{
+	bool clicked;
+	int x;
+	int y;
+	GLfloat lastZ;
+	picture* lastPic;
+	mouseClick(){
+		clicked = false;
+		x = 0;
+		y = 0;
+		lastZ = 0;
+		lastPic = NULL;
+	}
+};
+
+mouseClick click;
+
 struct treeNode{
 	picture* pic;
 	treeNode* right;
@@ -92,10 +109,16 @@ float pictures [4][6] = { 100, 100, width + 20, 1, width-100, 1,
 						  100, 100, width + 300, 1, -100, -1,
 						  50,  50, width, 1, -width/2, 1 };
 
+void reshape(int w, int h){
+    //win_w = w;
+    //win_h = h;
+    //glViewport(0, 0, w, h);
+}
 void resetCamera() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	camera[0] = camera[1] = camera[3] = camera[4] = camera[5] = 0;
+	camera[0] = camera[3] = camera[4] = camera[5] = 0;
+	camera[1] = 500;
 	camera[2] = depth*distanceMultiplier*1.5;
 	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
 	gluLookAt(camera[0], camera[1], camera[2], 
@@ -151,8 +174,27 @@ void drawTree(treeNode* tree) {
 	//This is all recursive up in here!
 	if (tree->pic) {
 		//leaf(with picture)
-		tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle);
-		
+		float oldClickDepth;
+		//if (click.clicked) {
+		if (true){ //debug, change this back
+			glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &oldClickDepth);
+		}
+		if (lookat == tree->pic) {
+			tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle, true);
+		} else {
+			tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle);
+		}
+
+		//if (click.clicked) {
+		if (true) { //debug, change this back
+			float newClickDepth;
+			glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &newClickDepth);
+			if (newClickDepth != oldClickDepth) {
+				click.lastPic = tree->pic;
+				lookat = tree->pic;
+			}
+		}
+
 	} else {
 		GLfloat x1 = tree->xpos + (cos(toRadian(tree->angle)) * tree->radius);
 		GLfloat z1 = tree->zpos + (sin(toRadian(tree->angle)) * tree->radius);
@@ -200,7 +242,8 @@ void myDisplayCallback(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//if (tracking) cameraTrack();
-	cout<<lookat->angle<<"\n"; //debug
+	//cout<<lookat->angle<<"\n"; //debug
+
 	if (tracking) track();
 	
 	glMatrixMode(GL_MODELVIEW);
@@ -208,7 +251,11 @@ void myDisplayCallback(){
 	if (!hideCoord) coordinates(1000);
 	//redraw();
 	drawTree(root);
-	renderBitmapString(-1000, -1000, GLUT_BITMAP_9_BY_15, "Hello");
+	if (click.clicked) {
+		tracking = true;
+		click.clicked = false;
+	}
+	//renderBitmapString(-1000, -1000, GLUT_BITMAP_9_BY_15, "Hello");
 
 	glFlush();
 	glutSwapBuffers();
@@ -245,10 +292,25 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 		default: break;
 	}
 }
+//void mouseCallback(int buttonName, int state, int cursorX, int cursorY) {
+//	if (buttonName == GLUT_LEFT_BUTTON && state == GLUT_UP && followPicIndex != -1) {
+//		tracking = !tracking;
+//		if (!tracking) resetCamera();
+//	}
+//}
 void mouseCallback(int buttonName, int state, int cursorX, int cursorY) {
-	if (buttonName == GLUT_LEFT_BUTTON && state == GLUT_UP && followPicIndex != -1) {
-		tracking = !tracking;
-		if (!tracking) resetCamera();
+#ifdef DEBUG
+	cout<<"->MouseClick X:"<<cursorX<<" Y:"<<cursorY<<"\n";
+#endif
+	if (buttonName == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+		if (tracking) {
+			resetCamera();
+			tracking = false;
+		} else {
+			click.clicked = true;
+			click.x = cursorX;
+			click.y = width - cursorY;
+		}
 	}
 }
 void myInit(){
@@ -274,9 +336,20 @@ void timer(int v) {
 }
 void passiveMove(int cursorX, int cursorY) {
 	// No use yet
+#ifdef DEBUG
+	//cout<<"->passiveMove X:"<<cursorX<<" Y:"<<cursorY<<"\n";
+#endif
+			//click.clicked = true;
+	if (!tracking) {
+		click.x = cursorX;
+		click.y = height - cursorY;
+	}
 }
 void mouseMovement(int cursorX, int cursorY) {
 	// No use yet
+#ifdef DEBUG
+	cout<<"->MouseMove X:"<<cursorX<<" Y:"<<cursorY<<"\n";
+#endif
 }
 void loadManifest(const char* manifestFilename){
 	/* Loads the configuration data from the manifest file. 
@@ -351,6 +424,8 @@ void main(int argc, char ** argv){
 	//initialize project stuff
 	srand(time(NULL));
 	root = new treeNode(0, 0, 0, 2000);
+	//click = new mouseClick();
+	click.clicked = false;
 	loadHardTree();
 	//pause();
 

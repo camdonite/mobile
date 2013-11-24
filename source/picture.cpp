@@ -91,7 +91,7 @@ void picture::display(){
 		//highlight picture if need be
 		if (highlighted) {
 			glPushMatrix();
-			glTranslatef(x, y, z);
+			glTranslatef(x, y - height, z);
 			glRotatef(angle, 0.0, 1.0, 0.0);
 			glColor3f(1, 1, 0);
 			glLineWidth(5);
