@@ -23,16 +23,24 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 
 #define editor_title "3D Mobile"
 #define DEFAULT_MANIFEST "C:\\temp\\project\\manifest.txt"
-#define SPEED_RANGE 3
+#define SPEED_RANGE 0.5
+#define WOBBLE 2
 using namespace std;
 
-picture* pics[300];
-int picCount = 0;
-double myangle = 0;
+//picture* pics[300];
+//int picCount = 0;
+//double myangle = 0;
 
 static bool spinning = true;
-static const int FPS = 5;
+static const int FPS = 30;
 static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
+picture* lookat;
+
+GLfloat random(){
+	GLfloat out = ((GLfloat) rand() / RAND_MAX) * (SPEED_RANGE * 2) - SPEED_RANGE;
+	cout<<"->Random:"<<out<<"\n";
+	return out;
+}
 
 struct treeNode{
 	picture* pic;
@@ -44,7 +52,7 @@ struct treeNode{
 	GLfloat angle;
 	GLfloat radius;
 	GLfloat speed;
-	treeNode(GLfloat x, GLfloat y, GLfloat z, GLfloat s){
+	treeNode(GLfloat x, GLfloat y, GLfloat z, GLfloat r){
 		pic = NULL;
 		right = NULL;
 		left = NULL;
@@ -52,8 +60,8 @@ struct treeNode{
 		ypos = y;
 		zpos = z;
 		angle = 0.0;
-		speed = rand() % (SPEED_RANGE * 2) - (SPEED_RANGE - 1);//-3 to 3
-		radius = s;
+		speed = random();
+		radius = r;
 	}
 	treeNode() {
 		treeNode(0.0, 0.0, 0.0, 0.0);
@@ -74,10 +82,10 @@ double angle = 0;
 int followPicIndex = -1;
 
 bool hideHelp = true,
-	 hideCoord = true,
+	 hideCoord = false,
 	 tracking = false;
 
-double camera[9] =  {0, 0, depth*distanceMultiplier*1.5, 0, 0, 0, 0, 1, 0};
+double camera[9] =  {0, 500, depth*distanceMultiplier*1.5, 0, 0, 0, 0, 1, 0};
 
 float pictures [4][6] = { 100, 100, width + 20, 1, width-100, 1,
 						  100, 100, width + 700, 2, 200, 1,
@@ -112,55 +120,95 @@ void cameraTrack() {
 		      camera[3], camera[4], camera[5], 
 			  camera[6], camera[7], camera[8]);
 }
+void track(){
+	glMatrixMode(GL_PROJECTION);
+	//glPushMatrix();
+	glLoadIdentity();
+	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
+	//glTranslatef(lookat->x + 1000, lookat->y - lookat->height, lookat->z + 1000);
+	//glRotatef(lookat->angle, 0.0, 1.0, 0.0);
+//#ifdef DEBUG_LEVEL2
+	//cout<<lookat->angle<<"\n"; //debug
+//#endif
+
+	gluLookAt(lookat->x - (1200 * sin(toRadian(lookat->angle + 180 + WOBBLE))),
+		lookat->y - lookat->height,
+		lookat->z - (1200 * cos(toRadian(lookat->angle + 180 - WOBBLE))),
+			  lookat->x, lookat->y - lookat->height, lookat->z,
+			  camera[6], camera[7], camera[8]);
+	//gluLookAt(0, 0, 0,
+	//		0, 0, 0,
+	//		camera[6], camera[7], camera[8]);
+	//glPopMatrix();
+}
 void redraw(){
 	//if (!hideCoord)
 	//	coordinates(500);
 
 
 }
-void drawTree(treeNode* tree) {
+void drawTree(treeNode* tree) {	
 	//This is all recursive up in here!
-	if (tree->pic != NULL) {
+	if (tree->pic) {
 		//leaf(with picture)
 		tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle);
 		
 	} else {
-		//process left subtree
-		tree->left->xpos = tree->xpos + (cos(toRadian(tree->angle)) * tree->radius);
-		tree->left->zpos = tree->zpos + (sin(toRadian(tree->angle)) * tree->radius);
-		drawTree(tree->left);
+		GLfloat x1 = tree->xpos + (cos(toRadian(tree->angle)) * tree->radius);
+		GLfloat z1 = tree->zpos + (sin(toRadian(tree->angle)) * tree->radius);
+		GLfloat x2 = tree->xpos + (cos(toRadian(tree->angle + 180)) * tree->radius);
+		GLfloat z2 = tree->zpos + (sin(toRadian(tree->angle + 180)) * tree->radius);
+		glColor3f(0, 1, 1);
+		
+		//draw the sticks
+		glBegin(GL_LINES);		
+		glVertex3f(x1, tree->left->ypos, z1);
+		glVertex3f(x1, tree->ypos, z1);
 
+		glVertex3f(x1, tree->ypos, z1);
+		glVertex3f(x2, tree->ypos, z2);
+
+		glVertex3f(x2, tree->ypos, z2);
+		glVertex3f(x2, tree->right->ypos, z2);
+		glEnd();
+
+		//process left subtree
+		if (tree->left) {
+			tree->left->xpos = x1;
+			tree->left->zpos = z1;
+			drawTree(tree->left);
+		}
 		//process right subtree
-		tree->right->xpos = tree->xpos + (cos(toRadian(tree->angle + 180)) * tree->radius);
-		tree->right->zpos = tree->zpos + (sin(toRadian(tree->angle + 180)) * tree->radius);
-		drawTree(tree->right);
+		if (tree->right) {
+			tree->right->xpos = x2;
+			tree->right->zpos = z2;
+			drawTree(tree->right);
+		}
 
 	}
-	tree->angle += tree->speed;
+	tree->angle += tree->speed; //add speed to the angle each fram
+	//check for angle overflow
 	if (tree->angle > 360) {
 		tree->angle -= 360;
 	}
 	if (tree->angle < 0) {
 		tree->angle += 360;
 	}
-	
 }
 void myDisplayCallback(){
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	if (tracking) cameraTrack();
+	//if (tracking) cameraTrack();
+	cout<<lookat->angle<<"\n"; //debug
+	if (tracking) track();
 	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	if (!hideCoord) coordinates(1000);
 	//redraw();
 	drawTree(root);
-
-	myangle += 5;
-	if (myangle > 360) myangle = 1;
-	coordinates(500);
-
-	//pics[0]->display(1000.0, 0.0, 1000.0, myangle);
+	renderBitmapString(-1000, -1000, GLUT_BITMAP_9_BY_15, "Hello");
 
 	glFlush();
 	glutSwapBuffers();
@@ -173,6 +221,9 @@ void rotate(double rads) {
 }
 void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 	switch (key) {
+		case 't':
+			tracking = !tracking;
+			break;
 		case '1': followPicIndex = 0;
 				  break;
 		case '2': followPicIndex = 1;
@@ -235,43 +286,52 @@ void loadManifest(const char* manifestFilename){
 	 */
 
 	//known bug: will crash if comment is at the end
-	ifstream file;
-	file.open(manifestFilename);
-	string filename;
-	GLfloat width;
-	GLfloat height;
-	string name;
-	string description;
-	string token;
-	while (!file.eof()) {
-		file>>token;
-		if (token == "/*") {
-			//itereate over comments
-			while (true){
-				file>>token;
-				if (token == "*/") break;
-			}
-			file>>token;
-		}
-		filename = token;
-		file>>width>>height>>name>>description;
-#ifdef DEBUG
-		cout<<"->IDX:"<<picCount<<"FN:"<<filename<<" W:"<<width<<" H:"<<height<<" NAME:"<<name<<" DESCRIPTION:"<<description<<"\n"; //debug
-#endif
-		pics[picCount] = new picture(filename, width, height, name, description);
-		picCount ++;
-	}
+//	ifstream file;
+//	file.open(manifestFilename);
+//	string filename;
+//	GLfloat width;
+//	GLfloat height;
+//	string name;
+//	string description;
+//	string token;
+//	while (!file.eof()) {
+//		file>>token;
+//		if (token == "/*") {
+//			//itereate over comments
+//			while (true){
+//				file>>token;
+//				if (token == "*/") break;
+//			}
+//			file>>token;
+//		}
+//		filename = token;
+//		file>>width>>height>>name>>description;
+//#ifdef DEBUG
+//		cout<<"->IDX:"<<picCount<<"FN:"<<filename<<" W:"<<width<<" H:"<<height<<" NAME:"<<name<<" DESCRIPTION:"<<description<<"\n"; //debug
+//#endif
+//		pics[picCount] = new picture(filename, width, height, name, description);
+//		picCount ++;
+//	}
 }
 void loadHardTree(){
-	root->left = new treeNode(0, 0, -100, 800);
-	root->right = new treeNode(0, 0, -100, 800);
+	//this is just a hardcoded tree. Trees are hard.
+	root->left = new treeNode(0, -100, 0, 800);
+	root->right = new treeNode(0, -100, 0, 800);
 
-	//root->left
+	root->left->left = new treeNode(0, -200, 0, 800);
+	root->left->right = new treeNode(0, -200, 0, 800);
 
-	root->left->pic = new picture("C:\\temp\\project\\pics\\samp\\bard.jpg", 600, 600, "bard", "thing");
-	root->right->pic = new picture("C:\\temp\\project\\pics\\samp\\sette.jpg", 600, 600, "sette", "haters");
-	//root->left->pic = 0;
-	//root->right->pic = 1;
+	root->right->left = new treeNode(0, -200, 0, 800);
+	root->right->right = new treeNode(0, -200, 0, 800);
+
+	root->left->left->pic = new picture("C:\\temp\\project\\pics\\1.jpg", 800, 600, "bard", "thing");
+	root->left->right->pic = new picture("C:\\temp\\project\\pics\\2.jpg", 800, 600, "batoro", "kids");
+
+
+	root->right->left->pic = new picture("C:\\temp\\project\\pics\\3.jpg", 800, 600, "bard", "thing is beans");
+	root->right->right->pic = new picture("C:\\temp\\project\\pics\\4.jpg", 800, 600, "sette", "haters");
+
+	lookat = root->left->left->pic;
 }
 void main(int argc, char ** argv){
 	//initialize glut and openGL
@@ -281,7 +341,7 @@ void main(int argc, char ** argv){
 	glutInitWindowPosition(600, 0);			// specify a window position
 	glutCreateWindow(editor_title);	// create a titled window
 	myInit();									// setting up
-	
+
 	//if (argc < 2) {
 	//	//no command line parameters given
 	//	loadManifest(DEFAULT_MANIFEST);
@@ -292,6 +352,7 @@ void main(int argc, char ** argv){
 	srand(time(NULL));
 	root = new treeNode(0, 0, 0, 2000);
 	loadHardTree();
+	//pause();
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback

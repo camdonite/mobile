@@ -23,14 +23,26 @@ private:
 	GLuint texture;
 	bool loaded;
 public:
+	GLfloat x;
+	GLfloat y;
+	GLfloat z;
+	GLfloat angle;
 	GLfloat width;
 	GLfloat height;
+	bool highlighted;
 	//constructors
 	//picture(string filename);
 	//picture(string filename, GLfloat width, GLfloat height);
 	//picture(string filename, string name, string description); //filename, name, description
 	picture(string filename, GLfloat width, GLfloat height, string name = DEFAULT_NAME, string description = DEFAULT_DESCRIPTION);
-	void display(GLfloat, GLfloat, GLfloat, GLfloat, bool highlighted = false);
-	//void display(float, float, float, float, float, float, float, float);
+	void display(GLfloat lx, GLfloat ly, GLfloat lz, GLfloat langle, bool lhighlighted = false){
+		x = lx;
+		y = ly;
+		z = lz;
+		angle = langle;
+		highlighted = lhighlighted;
+		display();
+	}
+	void display();
 };
 #endif
