@@ -1,9 +1,11 @@
-#include "helpers.h"
+#ifndef PICTURE_H
+#define PICTURE_H
+
 #define DEFAULT_WIDTH 600
 #define DEFAULT_HEIGHT 600
 #define DEFAULT_NAME "untitled"
 #define DEFAULT_DESCRIPTION "no description"
-
+#include "helpers.h"
 class picture{
 	/* This class provides storage and operations for each image.
 	 * The constructor creates a picture object, and loads the image from the file
@@ -15,7 +17,7 @@ private:
 	string description;
 	//char name[100];
 	//char description[1000];
-
+	GLuint loadTexture(string);
 	float texWidth;
 	float texHeight;
 	GLuint texture;
@@ -31,3 +33,4 @@ public:
 	void display(GLfloat, GLfloat, GLfloat, GLfloat, bool highlighted = false);
 	//void display(float, float, float, float, float, float, float, float);
 };
+#endif

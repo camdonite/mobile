@@ -24,8 +24,6 @@ double toDegree(double);
 double toRadian(double);
 //converts degrees to radians
 
-GLuint loadTexture(string);
-
 void renderBitmapString(double, double, void*, string);
 //displays the string on the screen (xcoord, ycoord, font, diplaystring)
 

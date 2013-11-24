@@ -92,3 +92,12 @@ void picture::display(GLfloat x, GLfloat y, GLfloat z, GLfloat angle, bool highl
 		}
 	}
 }
+
+GLuint picture::loadTexture(string filename) {
+	GLuint tex_ID = SOIL_load_OGL_texture(filename.c_str(), 
+										  SOIL_LOAD_AUTO,
+										  SOIL_CREATE_NEW_ID, 
+										  SOIL_FLAG_POWER_OF_TWO
+										  | SOIL_FLAG_DDS_LOAD_DIRECT);
+	return tex_ID;
+}

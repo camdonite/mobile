@@ -23,6 +23,7 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 
 #define editor_title "3D Mobile"
 #define DEFAULT_MANIFEST "C:\\temp\\project\\manifest.txt"
+using namespace std;
 
 picture* pics[300];
 int picCount = 0;
@@ -32,14 +33,32 @@ static bool spinning = true;
 static const int FPS = 5;
 static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
 
-//int picCount = 3;
-//GLuint textures[3];
-//
-//string load_me[3] = { "C:\\temp\\project\\pics\\samp\\bard.jpg",
-//					  "C:\\temp\\project\\pics\\samp\\batoro.png",
-//					   "C:\\temp\\project\\pics\\samp\\sette.jpg"};
+struct treeNode{
+	picture* pic;
+	treeNode* right;
+	treeNode* left;
+	GLfloat xpos;
+	GLfloat ypos;
+	GLfloat zpos;
+	GLfloat angle;
+	GLfloat size;
+	treeNode(GLfloat x, GLfloat y, GLfloat z, GLfloat s){
+		pic = NULL;
+		right = NULL;
+		left = NULL;
+		xpos = x;
+		ypos = y;
+		zpos = z;
+		angle = 0.0;
+		size = s;
+	}
+	treeNode() {
+		treeNode(0.0, 0.0, 0.0, 0.0);
+	}
+};
 
-using namespace std;
+treeNode* root;
+
 int height = 600,
 	width  = 600,
 	depth = 600;
@@ -229,21 +248,36 @@ void loadManifest(const char* manifestFilename){
 		picCount ++;
 	}
 }
+void loadHardTree(){
+	root->left = new treeNode(0, 0, -100, 800);
+	root->right = new treeNode(0, 0, -100, 800);
+
+	root->left->pic = new picture("C:\\temp\\project\\pics\\samp\\bard.jpg", 600, 600, "bard", "thing");
+	root->right->pic = new picture("C:\\temp\\project\\pics\\samp\\sette.jpg", 600, 600, "sette", "haters");
+	//root->left->pic = 0;
+	//root->right->pic = 1;
+}
 void main(int argc, char ** argv){
 	glutInit(& argc, argv);
-
+	root = new treeNode(0, 0, 0, 2000);
+	//loadManifest(DEFAULT_MANIFEST);
+	
+	//root->size = 5;
+	//cout<<root->size<<"\n";
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
 	glutInitWindowPosition(600, 0);			// specify a window position
 	glutCreateWindow(editor_title);	// create a titled window
 	myInit();									// setting up
 	
-	if (argc < 2) {
-		//no command line parameters given
-		loadManifest(DEFAULT_MANIFEST);
-	} else {
-		loadManifest(argv[1]);
-	}
+	//if (argc < 2) {
+	//	//no command line parameters given
+	//	loadManifest(DEFAULT_MANIFEST);
+	//} else {
+	//	loadManifest(argv[1]);
+	//}
+
+	loadHardTree();
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback

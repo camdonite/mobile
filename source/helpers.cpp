@@ -1,21 +1,28 @@
 //see helpers.h for comments
 #include "helpers.h"
 
+struct color{
+	GLfloat red;
+	GLfloat green;
+	GLfloat blue;
+	color() {
+		red = 0.0;
+		green = 0.0;
+		blue = 0.0;
+	}
+	color(GLfloat r, GLfloat g, GLfloat b){
+		red = r;
+		green = g;
+		blue = b;
+	}
+};
+
 double toRadian(double in){
 	return in * M_PI / 180;
 }
 
 double toDegree(double in){
 	return in * 180 / M_PI;
-}
-
-GLuint loadTexture(string filename) {
-	GLuint tex_ID = SOIL_load_OGL_texture(filename.c_str(), 
-										  SOIL_LOAD_AUTO,
-										  SOIL_CREATE_NEW_ID, 
-										  SOIL_FLAG_POWER_OF_TWO
-										  | SOIL_FLAG_DDS_LOAD_DIRECT);
-	return tex_ID;
 }
 
 void renderBitmapString(double x, double y, void *font, string str) {
