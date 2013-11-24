@@ -13,10 +13,13 @@ using namespace std;
 #include <GL/glut.h>				// include GLUT library
 #include <cmath>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <sstream>
 #include <fstream>
 #include "soil\SOIL.h"
+#include <time.h>
+
 
 double toDegree(double);
 //converts radains to degrees

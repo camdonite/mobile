@@ -23,6 +23,7 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 
 #define editor_title "3D Mobile"
 #define DEFAULT_MANIFEST "C:\\temp\\project\\manifest.txt"
+#define SPEED_RANGE 3
 using namespace std;
 
 picture* pics[300];
@@ -41,7 +42,8 @@ struct treeNode{
 	GLfloat ypos;
 	GLfloat zpos;
 	GLfloat angle;
-	GLfloat size;
+	GLfloat radius;
+	GLfloat speed;
 	treeNode(GLfloat x, GLfloat y, GLfloat z, GLfloat s){
 		pic = NULL;
 		right = NULL;
@@ -50,7 +52,8 @@ struct treeNode{
 		ypos = y;
 		zpos = z;
 		angle = 0.0;
-		size = s;
+		speed = rand() % (SPEED_RANGE * 2) - (SPEED_RANGE - 1);//-3 to 3
+		radius = s;
 	}
 	treeNode() {
 		treeNode(0.0, 0.0, 0.0, 0.0);
@@ -110,27 +113,37 @@ void cameraTrack() {
 			  camera[6], camera[7], camera[8]);
 }
 void redraw(){
-	if (!hideCoord)
-		coordinates(500);
-	for (int i = 0; i < 3; i++) {
-		//old method
-		//renderPictures(pictures[i][0], pictures[i][1], pictures[i][2], 
-		//			   currentAngleOfRotation[i], pictures[i][5],
-		//			   0, pictures[i][4], 0, 
-		//			   textures[i%picCount]);
+	//if (!hideCoord)
+	//	coordinates(500);
 
-		//new method
-		//mypic[i]->display(pictures[i][0], pictures[i][1], pictures[i][2], 
-		//		currentAngleOfRotation[i], pictures[i][5],
-		//		0, pictures[i][4], 0);
 
-		//if (i == followPicIndex) {
-		//	highlightPicture(pictures[i][0], pictures[i][1], pictures[i][2], 
-		//					 currentAngleOfRotation[i], pictures[i][5],
-		//					 0, pictures[i][4], 0);
-		//}
+}
+void drawTree(treeNode* tree) {
+	//This is all recursive up in here!
+	if (tree->pic != NULL) {
+		//leaf(with picture)
+		tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle);
+		
+	} else {
+		//process left subtree
+		tree->left->xpos = tree->xpos + (cos(toRadian(tree->angle)) * tree->radius);
+		tree->left->zpos = tree->zpos + (sin(toRadian(tree->angle)) * tree->radius);
+		drawTree(tree->left);
+
+		//process right subtree
+		tree->right->xpos = tree->xpos + (cos(toRadian(tree->angle + 180)) * tree->radius);
+		tree->right->zpos = tree->zpos + (sin(toRadian(tree->angle + 180)) * tree->radius);
+		drawTree(tree->right);
+
 	}
-
+	tree->angle += tree->speed;
+	if (tree->angle > 360) {
+		tree->angle -= 360;
+	}
+	if (tree->angle < 0) {
+		tree->angle += 360;
+	}
+	
 }
 void myDisplayCallback(){
 	glEnable(GL_DEPTH_TEST);
@@ -141,12 +154,13 @@ void myDisplayCallback(){
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	//redraw();
+	drawTree(root);
 
 	myangle += 5;
 	if (myangle > 360) myangle = 1;
 	coordinates(500);
 
-	pics[0]->display(1000.0, 0.0, 1000.0, myangle);
+	//pics[0]->display(1000.0, 0.0, 1000.0, myangle);
 
 	glFlush();
 	glutSwapBuffers();
@@ -252,18 +266,16 @@ void loadHardTree(){
 	root->left = new treeNode(0, 0, -100, 800);
 	root->right = new treeNode(0, 0, -100, 800);
 
+	//root->left
+
 	root->left->pic = new picture("C:\\temp\\project\\pics\\samp\\bard.jpg", 600, 600, "bard", "thing");
 	root->right->pic = new picture("C:\\temp\\project\\pics\\samp\\sette.jpg", 600, 600, "sette", "haters");
 	//root->left->pic = 0;
 	//root->right->pic = 1;
 }
 void main(int argc, char ** argv){
+	//initialize glut and openGL
 	glutInit(& argc, argv);
-	root = new treeNode(0, 0, 0, 2000);
-	//loadManifest(DEFAULT_MANIFEST);
-	
-	//root->size = 5;
-	//cout<<root->size<<"\n";
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
 	glutInitWindowPosition(600, 0);			// specify a window position
@@ -276,12 +288,14 @@ void main(int argc, char ** argv){
 	//} else {
 	//	loadManifest(argv[1]);
 	//}
-
+	//initialize project stuff
+	srand(time(NULL));
+	root = new treeNode(0, 0, 0, 2000);
 	loadHardTree();
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback
-	//glutTimerFunc(100, timer, 0);
+	glutTimerFunc(100, timer, 0);
 	
 	glutMouseFunc(mouseCallback);
 	glutMotionFunc(mouseMovement);
