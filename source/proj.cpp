@@ -20,6 +20,7 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 
 #include "helpers.h"
 #include "picture.h"
+#include "camera.h"
 
 #define editor_title "3D Mobile"
 #define DEFAULT_MANIFEST "C:\\temp\\project\\manifest.txt"
@@ -56,7 +57,6 @@ struct mouseClick{
 		lastPic = NULL;
 	}
 };
-
 mouseClick click;
 
 struct treeNode{
@@ -87,13 +87,16 @@ struct treeNode{
 
 treeNode* root;
 
+//camera stuff
+
 int height = 600,
 	width  = 1000,
 	depth = 600;
-
 double distanceMultiplier = 5;
+camera cam(70.0, 1000, 600, 1, depth*distanceMultiplier*1000); //initalize the camera object
+cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
 
-int globalX, globalY;
+//int globalX, globalY;
 //double angle = 0;
 
 //int followPicIndex = -1;
@@ -102,46 +105,45 @@ bool hideHelp = true,
 	 hideCoord = false,
 	 tracking = false;
 
-double camera[9] =  {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0, 0, 1, 0};
-
-//cameraPos initalPosition = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
-
+//double camera[9] =  {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0, 0, 1, 0};
 
 void reshape(int w, int h){
-    width = w;
-    height = h;
-    glViewport(0, 0, w, h);
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	//gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
+    //width = w;
+    //height = h;
+    //glViewport(0, 0, w, h);
+	cam.changePerspective(70.0, w, h, 1, depth*distanceMultiplier*1000);
 }
 void resetCamera() {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	camera[0] = camera[3] = camera[5] = 0;
-	camera[4] = -1500;
-	camera[1] = -500;
-	camera[2] = depth*distanceMultiplier*1.5;
-	//gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
-#ifdef DEBUG
-	cout<<"->Aspect:("<<width<<","<<height<<")\n";
-#endif
-	gluPerspective(70.0, 1, width/height, depth*distanceMultiplier*1000);
-	gluLookAt(camera[0], camera[1], camera[2], 
-		      camera[3], camera[4], camera[5], 
-			  camera[6], camera[7], camera[8]);
+	cam.set(initialPos, true);
+//	glMatrixMode(GL_PROJECTION);
+//	glLoadIdentity();
+//	camera[0] = camera[3] = camera[5] = 0;
+//	camera[4] = -1500;
+//	camera[1] = -500;
+//	camera[2] = depth*distanceMultiplier*1.5;
+//#ifdef DEBUG
+//	cout<<"->Aspect:("<<width<<","<<height<<")\n";
+//#endif
+//	gluPerspective(70.0, 1, width/height, depth*distanceMultiplier*1000);
+//	gluLookAt(camera[0], camera[1], camera[2], 
+//		      camera[3], camera[4], camera[5], 
+//			  camera[6], camera[7], camera[8]);
 }
 void track(){
-	glMatrixMode(GL_PROJECTION);
+	//glMatrixMode(GL_PROJECTION);
 
-	glLoadIdentity();
-	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
+	//glLoadIdentity();
+	//gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
 
-	gluLookAt(lookat->x - (1200 * sin(toRadian(lookat->angle + 180 + WOBBLE))),
-		lookat->y - lookat->height,
-		lookat->z - (1200 * cos(toRadian(lookat->angle + 180 - WOBBLE))),
-			  lookat->x, lookat->y - lookat->height, lookat->z,
-			  camera[6], camera[7], camera[8]);
+	//gluLookAt(lookat->x - (1200 * sin(toRadian(lookat->angle + 180 + WOBBLE))),
+	//	lookat->y - lookat->height,
+	//	lookat->z - (1200 * cos(toRadian(lookat->angle + 180 - WOBBLE))),
+	//		  lookat->x, lookat->y - lookat->height, lookat->z,
+	//		  camera[6], camera[7], camera[8]);
+	cam.set(lookat->x - (1200 * sin(toRadian(lookat->angle + 180 + WOBBLE))),
+			lookat->y - lookat->height,
+			lookat->z - (1200 * cos(toRadian(lookat->angle + 180 - WOBBLE))),
+			lookat->x, lookat->y - lookat->height, lookat->z, true);
 }
 void drawTree(treeNode* tree) {	
 	//This is all recursive up in here!
@@ -289,13 +291,15 @@ void mouseCallback(int buttonName, int state, int cursorX, int cursorY) {
 	}
 }
 void myInit(){
-	glViewport(0, 0, width, height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
-	gluLookAt(camera[0], camera[1], camera[2], 
-		      camera[3], camera[4], camera[5], 
-			  camera[6], camera[7], camera[8]);
+	cam.set(initialPos);
+	cam.touch();
+	//glViewport(0, 0, width, height);
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
+	//gluLookAt(camera[0], camera[1], camera[2], 
+	//	      camera[3], camera[4], camera[5], 
+	//		  camera[6], camera[7], camera[8]);
 }
 void timer(int v) {
   //glutPostRedisplay();

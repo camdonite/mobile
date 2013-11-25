@@ -1,5 +1,8 @@
 #include "camera.h"
-
+void printCamPosStruct(cameraPos in){
+	cout<<"(pos)X:"<<in.x<<" Y:"<<in.y<<" Z:"<<in.z;
+	cout<<"\t(lookat)X:"<<in.lookatX<<" Y:"<<in.lookatY<<" Z:"<<in.lookatZ;
+}
 camera::camera(GLdouble ifovy, GLdouble iwidth, GLdouble iheight, GLdouble izNear, GLdouble izFar) {
 	upx = 0;
 	upy = 1;
@@ -35,12 +38,12 @@ void camera::changePerspective(GLdouble ifovy, GLdouble iwidth, GLdouble iheight
 	}
 }
 void camera::copyStruct(cameraPos* from, cameraPos* to){
-	from->x = to->x;
-	from->y = to->y;
-	from->z = to->z;
-	from->lookatX = to->lookatX;
-	from->lookatY = to->lookatY;
-	from->lookatZ = to->lookatZ;
+	to->x = from->x;
+	to->y = from->y;
+	to->z = from->z;
+	to->lookatX = from->lookatX;
+	to->lookatY = from->lookatY;
+	to->lookatZ = from->lookatZ;
 }
 void camera::animate(int frames){
 	framesLeft = frames;
@@ -64,20 +67,45 @@ void camera::set(GLfloat x, GLfloat y, GLfloat z, GLfloat lookatX, GLfloat looka
 	toPos.lookatX = lookatX;
 	toPos.lookatY = lookatY;
 	toPos.lookatZ = lookatZ;
+	if (framesLeft <= 0) {
+		currentPos.lookatX = lookatX;
+		currentPos.lookatY = lookatY;
+		currentPos.lookatZ = lookatZ;
+	}
 	if (t) touch();
 }
-void camera::setPos(cameraPos position, bool t){
+void camera::set(cameraPos position, bool t){
 	copyStruct(&position, &toPos);
 	if (framesLeft <= 0) {
+		//cout<<"copying\n"; //debug
 		copyStruct(&position, &currentPos);
 	}
 	changed = true;
 	if (t) touch();
 }
+void camera::setPos(cameraPos position, bool t){
+	toPos.x = position.x;
+	toPos.y = position.y;
+	toPos.z = position.z;
+	if (framesLeft <= 0) {
+		currentPos.x = position.x;
+		currentPos.y = position.y;
+		currentPos.z = position.z;
+	}
+	changed = true;
+	if (t) touch();
+}
 void camera::touch(){
+#ifdef DEBUG
+	cout<<"->touch";
+	if (!changed) cout<<"(VOID)";
+	printCamPosStruct(currentPos);
+	cout<<"\t(vup)X:"<<upx<<" Y:"<<upy<<" Z:"<<upz<<"\n";
+#endif
 	if (changed) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
+		gluPerspective(fovy, width/height, zNear, zFar);
 		gluLookAt(currentPos.x, currentPos.y, currentPos.z,
 				  currentPos.lookatX, currentPos.lookatY, currentPos.lookatZ,
 				  upx, upy, upz);
