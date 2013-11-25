@@ -235,12 +235,12 @@ void myDisplayCallback(){
 	//don't put stuff here, have everything redraw off the timer tick
 	// prevents window refreshes from making the thing spin out of control
 }
-void translate(double x, double y) {
-	myDisplayCallback();
-}
-void rotate(double rads) {
-	myDisplayCallback();
-}
+//void translate(double x, double y) {
+//	myDisplayCallback();
+//}
+//void rotate(double rads) {
+//	myDisplayCallback();
+//}
 void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 	switch (key) {
 		case 't':
@@ -298,11 +298,9 @@ void myInit(){
 			  camera[6], camera[7], camera[8]);
 }
 void timer(int v) {
-
   //glutPostRedisplay();
-
 	redraw();
-  glutTimerFunc(1000/FPS, timer, v);
+	glutTimerFunc(1000/FPS, timer, v);
 }
 void passiveMove(int cursorX, int cursorY) {
 	// No use yet
@@ -354,7 +352,8 @@ void loadManifest(const char* manifestFilename){
 //	}
 }
 void loadHardTree(){
-	//this is just a hardcoded tree. Trees are hard.
+	//this is just a hardcoded tree. For debug purposes
+	//Trees are hard.
 	root->left = new treeNode(0, -100, 0, 800);
 	root->right = new treeNode(0, -100, 0, 800);
 
