@@ -1,4 +1,4 @@
-﻿Build started 11/24/2013 9:17:43 PM.
+﻿Build started 11/24/2013 9:21:50 PM.
      1>Project "C:\temp\project\mobile\source\ProjectProject\ProjectProject\ProjectProject.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\camera.cpp ..\..\helpers.cpp ..\..\picture.cpp ..\..\proj.cpp
@@ -9,6 +9,23 @@
          helpers.cpp
      1>c:\temp\project\mobile\source\helpers.cpp(45): warning C4553: '==' : operator has no effect; did you intend '='?
          camera.cpp
+         Generating Code...
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\soil\SOIL.c ..\..\soil\image_DXT.c ..\..\soil\image_helper.c ..\..\soil\stb_image_aug.c
+         stb_image_aug.c
+     1>c:\temp\project\mobile\source\soil\stbi_dds_aug_c.h(362): warning C4018: '>' : signed/unsigned mismatch
+     1>c:\temp\project\mobile\source\soil\stbi_dds_aug_c.h(366): warning C4018: '>' : signed/unsigned mismatch
+     1>c:\temp\project\mobile\source\soil\stbi_dds_aug_c.h(390): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\temp\project\mobile\source\soil\stbi_dds_aug_c.h(427): warning C4018: '<' : signed/unsigned mismatch
+         image_helper.c
+     1>c:\temp\project\mobile\source\soil\image_helper.c(325): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\temp\project\mobile\source\soil\image_helper.c(366): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\temp\project\mobile\source\soil\image_helper.c(373): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
+     1>c:\temp\project\mobile\source\soil\image_helper.c(415): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\temp\project\mobile\source\soil\image_helper.c(422): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
+         image_DXT.c
+         SOIL.c
+     1>c:\temp\project\mobile\source\soil\soil.c(1720): warning C4018: '<=' : signed/unsigned mismatch
+     1>c:\temp\project\mobile\source\soil\soil.c(1730): warning C4018: '<' : signed/unsigned mismatch
          Generating Code...
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\temp\project\mobile\source\ProjectProject\Debug\ProjectProject.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\temp\project\mobile\source\ProjectProject\Debug\ProjectProject.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\temp\project\mobile\source\ProjectProject\Debug\ProjectProject.lib" /MACHINE:X86 Debug\camera.obj
@@ -25,4 +42,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.89
+Time Elapsed 00:00:03.27
