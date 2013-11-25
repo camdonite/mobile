@@ -77,7 +77,6 @@ void camera::set(GLfloat x, GLfloat y, GLfloat z, GLfloat lookatX, GLfloat looka
 void camera::set(cameraPos position, bool t){
 	copyStruct(&position, &toPos);
 	if (framesLeft <= 0) {
-		//cout<<"copying\n"; //debug
 		copyStruct(&position, &currentPos);
 	}
 	changed = true;
@@ -98,14 +97,6 @@ void camera::setPos(cameraPos position, bool t){
 void camera::touch(){
 	if (framesLeft > 0) {
 		//for animations
-//#ifdef DEBUG
-//		cout<<"->touch::from";
-//		printCamPosStruct(fromPos);
-//		cout<<"\n->touch::to";
-//		printCamPosStruct(toPos);
-//		cout<<"\n";
-//
-//#endif
 		if (framesAnimate == 0) {
 			//prevent / 0
 			framesLeft = 1;
@@ -123,13 +114,6 @@ void camera::touch(){
 		framesLeft --;
 		changed = true;
 	}
-
-//#ifdef DEBUG
-//	cout<<"->touch::current";
-//	if (!changed) cout<<"(VOID)";
-//	printCamPosStruct(currentPos);
-//	cout<<"\t(vup)X:"<<upx<<" Y:"<<upy<<" Z:"<<upz<<"\n";
-//#endif
 	if (changed) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

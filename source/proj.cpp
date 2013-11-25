@@ -28,10 +28,6 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #define WOBBLE 2
 using namespace std;
 
-//picture* pics[300];
-//int picCount = 0;
-//double myangle = 0;
-
 static GLbitfield bitmask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 static bool spinning = true;
 static int FPS = 60;
@@ -89,7 +85,6 @@ struct treeNode{
 treeNode* root;
 
 //camera stuff
-
 int height = 600,
 	width  = 1000,
 	depth = 600;
@@ -97,16 +92,9 @@ double distanceMultiplier = 5;
 camera cam(70.0, 1000, 600, 1, depth*distanceMultiplier*1000); //initalize the camera object
 cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
 
-//int globalX, globalY;
-//double angle = 0;
-
-//int followPicIndex = -1;
-
 bool hideHelp = true,
 	 showCoords = true,
 	 tracking = false;
-
-//double camera[9] =  {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0, 0, 1, 0};
 
 void reshape(int w, int h){
     //width = w;
@@ -215,7 +203,6 @@ void drawTree(treeNode* tree) {
 	}
 }
 void redraw(){
-	//glEnable(GL_DEPTH_TEST); 
 	glClear(bitmask);
 
 	if (tracking) track();
@@ -231,7 +218,6 @@ void redraw(){
 		tracking = true;
 		click.clicked = false;
 	}
-
 	glFlush();
 	glutSwapBuffers();
 }
@@ -248,7 +234,6 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 		if (FPS <= 0) FPS = 5;
 		cout<<"Framerate(FPS):"<<FPS<<"\n";
 		break;
-
 	case 'b'://this one is for fun
 		bitmask ^= GL_COLOR_BUFFER_BIT;
 		if (bitmask & GL_COLOR_BUFFER_BIT) {
@@ -258,7 +243,6 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 		}
 		break;
 	case 'd'://also for fun
-		//bitmask ^= GL_DEPTH_BUFFER_BIT;
 		if (glIsEnabled(GL_DEPTH_TEST)) {
 			glDisable(GL_DEPTH_TEST);
 			cout<<"Disabled Depth Test\n";
@@ -279,15 +263,6 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 			spinning = true;
 		}
 		break;
-	//case 't':
-	//	tracking = !tracking;
-	//	break;
-	//case 'r': 
-	//	if (tracking) {
-	//		tracking = !tracking;
-	//		resetCamera();
-	//	}
-	//	break;
 	case 'c': 
 		if (showCoords) {
 			cout<<"Hiding Coordinate Axis\n";
@@ -326,25 +301,12 @@ void myInit(){
 	glEnable(GL_DEPTH_TEST); 
 	cam.set(initialPos);
 	cam.touch();
-	//glViewport(0, 0, width, height);
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	//gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
-	//gluLookAt(camera[0], camera[1], camera[2], 
-	//	      camera[3], camera[4], camera[5], 
-	//		  camera[6], camera[7], camera[8]);
 }
 void timer(int v) {
-  //glutPostRedisplay();
 	if (spinning) redraw();
 	glutTimerFunc(1000/FPS, timer, v);
 }
 void passiveMove(int cursorX, int cursorY) {
-	// No use yet
-#ifdef DEBUG
-	//cout<<"->passiveMove X:"<<cursorX<<" Y:"<<cursorY<<"\n";
-#endif
-			//click.clicked = true;
 	if (!tracking) {
 		click.x = cursorX;
 		click.y = (int) cam.height - cursorY;
@@ -432,10 +394,9 @@ void main(int argc, char ** argv){
 	//initialize project stuff
 	srand(time(NULL));
 	root = new treeNode(0, 0, 0, 3000);
-	//click = new mouseClick();
+
 	click.clicked = false;
 	loadHardTree();
-	//pause();
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback
