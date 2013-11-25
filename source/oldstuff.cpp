@@ -1,3 +1,22 @@
+void cameraTrack() {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
+
+	double z = pictures[followPicIndex][2]+1000;
+
+	camera[0] = z * sin(currentAngleOfRotation[followPicIndex]*pictures[followPicIndex][5]*M_PI/180);
+	camera[1] = pictures[followPicIndex][4];
+	camera[2] = z * cos(currentAngleOfRotation[followPicIndex]*pictures[followPicIndex][5]*M_PI/180);
+	camera[3] = 0;
+	camera[4] = pictures[followPicIndex][4];
+	camera[5] = 0;
+	
+	gluLookAt(camera[0], camera[1], camera[2], 
+		      camera[3], camera[4], camera[5], 
+			  camera[6], camera[7], camera[8]);
+}
+
 void loadImages() {
 	cout << "Loading images...\n";
 	glGenTextures(picCount, textures);
