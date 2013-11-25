@@ -14,6 +14,7 @@
 //}
 
 picture::picture(string filename, GLfloat inWidth, GLfloat inHeight, string inName, string inDescription){
+	errno = 0;
 #ifdef DEBUG	
 	cout << "->Constructing texture object for " << filename << ": Loading...";
 #endif
@@ -23,11 +24,15 @@ picture::picture(string filename, GLfloat inWidth, GLfloat inHeight, string inNa
 	loaded = false;
 	width = inWidth;
 	height = inHeight;
+	x = 0;
+	y = 0;
+	z = 0;
+	highlighted = false;
 	
 	texture = loadTexture(filename.c_str());
-	if (texture < 0) {
+	if (texture <= 0) {
 #ifdef DEBUG
-		cout << "Error on image " << texture << ": " << errno << "\n";
+		cout << "Error " << errno << " on image " << texture << ": " << strerror(errno) <<"\n";
 #endif
 		glDisable(GL_TEXTURE_2D);
 	} else {
@@ -41,18 +46,28 @@ picture::picture(string filename, GLfloat inWidth, GLfloat inHeight, string inNa
 #endif
 		loaded = true;
 	}
-
+	//pause(); //debug
 }
 
-void picture::display(GLfloat x, GLfloat y, GLfloat z, GLfloat angle, bool highlighted){
+void picture::display(){
+
 	if (loaded) { //doesn't display anything if a pic failed to load
-#ifdef DEBUG
+#ifdef DEBUG_LEVEL2
 		cout << "->displaying pic " << name << "[" << texture << "]! DES:" << description << "\n";
 #endif
+		//debug
+		//glColor3f(1, 1, 1);
+		//glBegin(GL_LINES);
+		//	glVertex3f(x, y - height, z);
+		//	glVertex3f(x - (1500 * cos(toRadian(angle))), y - height, z - (1500 * sin(toRadian(angle))));
+		//glEnd();
+
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
+		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		glTranslatef(x, y, z);
+		//glLoadIdentity();
+		glTranslatef(x, y - height, z);
 		glRotatef(angle, 0.0, 1.0, 0.0);
 
 		glColor3f(1, 1, 1);
@@ -67,7 +82,7 @@ void picture::display(GLfloat x, GLfloat y, GLfloat z, GLfloat angle, bool highl
 			glVertex3f(-width, -height, 0);
 
 			glTexCoord2f(1.0f, 1.0f); 
-			glVertex3f(height, -height, 0);
+			glVertex3f(width, -height, 0);
 		glEnd();
 
 		glPopMatrix();
@@ -76,7 +91,7 @@ void picture::display(GLfloat x, GLfloat y, GLfloat z, GLfloat angle, bool highl
 		//highlight picture if need be
 		if (highlighted) {
 			glPushMatrix();
-			glTranslatef(x, y, z);
+			glTranslatef(x, y - height, z);
 			glRotatef(angle, 0.0, 1.0, 0.0);
 			glColor3f(1, 1, 0);
 			glLineWidth(5);
