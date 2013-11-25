@@ -76,6 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\camera.cpp" />
     <ClCompile Include="..\..\helpers.cpp" />
     <ClCompile Include="..\..\picture.cpp" />
     <ClCompile Include="..\..\proj.cpp" />
@@ -85,6 +86,7 @@
     <ClCompile Include="..\..\soil\stb_image_aug.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\camera.h" />
     <ClInclude Include="..\..\helpers.h" />
     <ClInclude Include="..\..\picture.h" />
     <ClInclude Include="..\..\soil\image_DXT.h" />

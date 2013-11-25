@@ -88,87 +88,60 @@ struct treeNode{
 treeNode* root;
 
 int height = 600,
-	width  = 600,
+	width  = 1000,
 	depth = 600;
 
 double distanceMultiplier = 5;
 
 int globalX, globalY;
-double angle = 0;
+//double angle = 0;
 
-int followPicIndex = -1;
+//int followPicIndex = -1;
 
 bool hideHelp = true,
 	 hideCoord = false,
 	 tracking = false;
 
-double camera[9] =  {0, 500, depth*distanceMultiplier*1.5, 0, 0, 0, 0, 1, 0};
+double camera[9] =  {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0, 0, 1, 0};
 
-float pictures [4][6] = { 100, 100, width + 20, 1, width-100, 1,
-						  100, 100, width + 700, 2, 200, 1,
-						  100, 100, width + 300, 1, -100, -1,
-						  50,  50, width, 1, -width/2, 1 };
+//cameraPos initalPosition = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
+
 
 void reshape(int w, int h){
-    //win_w = w;
-    //win_h = h;
-    //glViewport(0, 0, w, h);
+    width = w;
+    height = h;
+    glViewport(0, 0, w, h);
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
 }
 void resetCamera() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	camera[0] = camera[3] = camera[4] = camera[5] = 0;
-	camera[1] = 500;
+	camera[0] = camera[3] = camera[5] = 0;
+	camera[4] = -1500;
+	camera[1] = -500;
 	camera[2] = depth*distanceMultiplier*1.5;
-	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
-	gluLookAt(camera[0], camera[1], camera[2], 
-		      camera[3], camera[4], camera[5], 
-			  camera[6], camera[7], camera[8]);
-}
-void cameraTrack() {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
-
-	double z = pictures[followPicIndex][2]+1000;
-
-	camera[0] = z * sin(currentAngleOfRotation[followPicIndex]*pictures[followPicIndex][5]*M_PI/180);
-	camera[1] = pictures[followPicIndex][4];
-	camera[2] = z * cos(currentAngleOfRotation[followPicIndex]*pictures[followPicIndex][5]*M_PI/180);
-	camera[3] = 0;
-	camera[4] = pictures[followPicIndex][4];
-	camera[5] = 0;
-	
+	//gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
+#ifdef DEBUG
+	cout<<"->Aspect:("<<width<<","<<height<<")\n";
+#endif
+	gluPerspective(70.0, 1, width/height, depth*distanceMultiplier*1000);
 	gluLookAt(camera[0], camera[1], camera[2], 
 		      camera[3], camera[4], camera[5], 
 			  camera[6], camera[7], camera[8]);
 }
 void track(){
 	glMatrixMode(GL_PROJECTION);
-	//glPushMatrix();
+
 	glLoadIdentity();
 	gluPerspective(70.0, width/height, 1, depth*distanceMultiplier*1000);
-	//glTranslatef(lookat->x + 1000, lookat->y - lookat->height, lookat->z + 1000);
-	//glRotatef(lookat->angle, 0.0, 1.0, 0.0);
-//#ifdef DEBUG_LEVEL2
-	//cout<<lookat->angle<<"\n"; //debug
-//#endif
 
 	gluLookAt(lookat->x - (1200 * sin(toRadian(lookat->angle + 180 + WOBBLE))),
 		lookat->y - lookat->height,
 		lookat->z - (1200 * cos(toRadian(lookat->angle + 180 - WOBBLE))),
 			  lookat->x, lookat->y - lookat->height, lookat->z,
 			  camera[6], camera[7], camera[8]);
-	//gluLookAt(0, 0, 0,
-	//		0, 0, 0,
-	//		camera[6], camera[7], camera[8]);
-	//glPopMatrix();
-}
-void redraw(){
-	//if (!hideCoord)
-	//	coordinates(500);
-
-
 }
 void drawTree(treeNode* tree) {	
 	//This is all recursive up in here!
@@ -237,28 +210,30 @@ void drawTree(treeNode* tree) {
 		tree->angle += 360;
 	}
 }
-void myDisplayCallback(){
-	glEnable(GL_DEPTH_TEST);
+void redraw(){
+	glEnable(GL_DEPTH_TEST); 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	//if (tracking) cameraTrack();
-	//cout<<lookat->angle<<"\n"; //debug
+	//glClear(GL_DEPTH_BUFFER_BIT);//this one is for fun
 
 	if (tracking) track();
 	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	
 	if (!hideCoord) coordinates(1000);
-	//redraw();
+
 	drawTree(root);
 	if (click.clicked) {
 		tracking = true;
 		click.clicked = false;
 	}
-	//renderBitmapString(-1000, -1000, GLUT_BITMAP_9_BY_15, "Hello");
 
 	glFlush();
 	glutSwapBuffers();
+}
+void myDisplayCallback(){
+	//don't put stuff here, have everything redraw off the timer tick
+	// prevents window refreshes from making the thing spin out of control
 }
 void translate(double x, double y) {
 	myDisplayCallback();
@@ -271,15 +246,15 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 		case 't':
 			tracking = !tracking;
 			break;
-		case '1': followPicIndex = 0;
+		case '1': //followPicIndex = 0;
 				  break;
-		case '2': followPicIndex = 1;
+		case '2': //followPicIndex = 1;
 				  break;
-		case '3': followPicIndex = 2;
+		case '3': //followPicIndex = 2;
 				  break;
-		case '4': followPicIndex = 3;
+		case '4': //followPicIndex = 3;
 				  break;
-		case 'r': followPicIndex = -1;
+		case 'r': //followPicIndex = -1;
 				  if (tracking) {
 					  tracking = !tracking;
 					  resetCamera();
@@ -323,15 +298,10 @@ void myInit(){
 			  camera[6], camera[7], camera[8]);
 }
 void timer(int v) {
-  if (spinning) {
-	for (int i = 0; i < 4; i++) {
-		currentAngleOfRotation[i] += pictures[i][3];
-		if (currentAngleOfRotation[i] > 360.0) {
-		  currentAngleOfRotation[i] -= 360.0;
-		}
-	}
-    glutPostRedisplay();
-  }
+
+  //glutPostRedisplay();
+
+	redraw();
   glutTimerFunc(1000/FPS, timer, v);
 }
 void passiveMove(int cursorX, int cursorY) {
@@ -347,9 +317,6 @@ void passiveMove(int cursorX, int cursorY) {
 }
 void mouseMovement(int cursorX, int cursorY) {
 	// No use yet
-#ifdef DEBUG
-	cout<<"->MouseMove X:"<<cursorX<<" Y:"<<cursorY<<"\n";
-#endif
 }
 void loadManifest(const char* manifestFilename){
 	/* Loads the configuration data from the manifest file. 
@@ -436,5 +403,7 @@ void main(int argc, char ** argv){
 	glutMouseFunc(mouseCallback);
 	glutMotionFunc(mouseMovement);
 	glutPassiveMotionFunc(passiveMove);
+	glutReshapeFunc(reshape);
+	
 	glutMainLoop();							// get into an infinite loop
 }
