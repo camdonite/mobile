@@ -15,14 +15,15 @@ class camera{
 	//this is a singleton
 private:
 	bool changed;
-	cameraPos currentPos, toPos, fromPos;
+
 	int framesLeft, framesAnimate;
 	GLdouble upx, upy, upz;
-	GLdouble fovy, width, height, zNear, zFar;
+
 	void copyStruct(cameraPos* from, cameraPos* to);
 	
 public:
-	
+	cameraPos currentPos, toPos, fromPos;
+	GLdouble fovy, width, height, zNear, zFar;	
 	void animate(int frames);
 	camera(GLdouble ifovy, GLdouble iwidth, GLdouble iheight, GLdouble izNear, GLdouble izfar);
 	void changePerspective(GLdouble ifovy, GLdouble iwidth, GLdouble iheight, GLdouble izNear, GLdouble izFar, bool t = true);

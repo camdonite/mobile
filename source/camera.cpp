@@ -96,12 +96,40 @@ void camera::setPos(cameraPos position, bool t){
 	if (t) touch();
 }
 void camera::touch(){
-#ifdef DEBUG
-	cout<<"->touch";
-	if (!changed) cout<<"(VOID)";
-	printCamPosStruct(currentPos);
-	cout<<"\t(vup)X:"<<upx<<" Y:"<<upy<<" Z:"<<upz<<"\n";
-#endif
+	if (framesLeft > 0) {
+		//for animations
+//#ifdef DEBUG
+//		cout<<"->touch::from";
+//		printCamPosStruct(fromPos);
+//		cout<<"\n->touch::to";
+//		printCamPosStruct(toPos);
+//		cout<<"\n";
+//
+//#endif
+		if (framesAnimate == 0) {
+			//prevent / 0
+			framesLeft = 1;
+		} else {
+			float percentFrom = (float) framesLeft / framesAnimate;
+			float percentTo = 1 - percentFrom;
+
+			currentPos.x = (percentFrom * fromPos.x) + (percentTo * toPos.x);
+			currentPos.y = (percentFrom * fromPos.y) + (percentTo * toPos.y);
+			currentPos.z = (percentFrom * fromPos.z) + (percentTo * toPos.z);
+			currentPos.lookatX = (percentFrom * fromPos.lookatX) + (percentTo * toPos.lookatX);
+			currentPos.lookatY = (percentFrom * fromPos.lookatY) + (percentTo * toPos.lookatY);
+			currentPos.lookatZ = (percentFrom * fromPos.lookatZ) + (percentTo * toPos.lookatZ);
+		}
+		framesLeft --;
+		changed = true;
+	}
+
+//#ifdef DEBUG
+//	cout<<"->touch::current";
+//	if (!changed) cout<<"(VOID)";
+//	printCamPosStruct(currentPos);
+//	cout<<"\t(vup)X:"<<upx<<" Y:"<<upy<<" Z:"<<upz<<"\n";
+//#endif
 	if (changed) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
