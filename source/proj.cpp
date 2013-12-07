@@ -356,25 +356,29 @@ void loadHardTree(){
 	root->left = new treeNode(0, -100, 0, 1200);
 	root->right = new treeNode(0, -100, 0, 800);
 
-	root->left->left = new treeNode(0, -500, 0, 600);
-	root->left->right = new treeNode(0, -200, 0, 800);
+	root->left->pic = new picture("C:\\temp\\project\\pics\\1.jpg", 600, 500, "bard", "thing");
+	root->right->pic = new picture("C:\\temp\\project\\pics\\5.jpg", 600, 500, "bard", "thing");
 
-	root->right->left = new treeNode(0, -200, 0, 800);
-	root->right->right = new treeNode(0, -200, 0, 800);
+	//root->left->left = new treeNode(0, -500, 0, 600);
+	//root->left->right = new treeNode(0, -200, 0, 800);
 
-	root->left->left->left = new treeNode(0, -900, 0, 600);
-	root->left->left->right = new treeNode(0, -900, 0, 600);
+	//root->right->left = new treeNode(0, -200, 0, 800);
+	//root->right->right = new treeNode(0, -200, 0, 800);
 
-	root->left->left->left->pic = new picture("C:\\temp\\project\\pics\\1.jpg", 600, 500, "bard", "thing");
-	root->left->left->right->pic = new picture("C:\\temp\\project\\pics\\5.jpg", 600, 500, "bard", "thing");
+	//root->left->left->left = new treeNode(0, -900, 0, 600);
+	//root->left->left->right = new treeNode(0, -900, 0, 600);
+
+	//root->left->left->left->pic = new picture("C:\\temp\\project\\pics\\1.jpg", 600, 500, "bard", "thing");
+	//root->left->left->right->pic = new picture("C:\\temp\\project\\pics\\5.jpg", 600, 500, "bard", "thing");
 	
-	root->left->right->pic = new picture("C:\\temp\\project\\pics\\6.jpg", 800, 1300, "batoro", "kids");
+	//root->left->right->pic = new picture("C:\\temp\\project\\pics\\6.jpg", 800, 1300, "batoro", "kids");
 
 
-	root->right->left->pic = new picture("C:\\temp\\project\\pics\\3.jpg", 800, 600, "bard", "thing is beans");
-	root->right->right->pic = new picture("C:\\temp\\project\\pics\\4.jpg", 800, 600, "sette", "haters");
+	//root->right->left->pic = new picture("C:\\temp\\project\\pics\\3.jpg", 800, 600, "bard", "thing is beans");
+	//root->right->right->pic = new picture("C:\\temp\\project\\pics\\4.jpg", 800, 600, "sette", "haters");
 
-	lookat = root->left->left->pic;
+	//lookat = root->left->left->pic;
+	lookat = root->left->pic;
 }
 void main(int argc, char ** argv){
 	//initialize glut and openGL
