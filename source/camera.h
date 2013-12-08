@@ -16,12 +16,13 @@ class camera{
 private:
 	bool changed;
 
-	int framesLeft, framesAnimate;
+	int framesAnimate;
 	GLdouble upx, upy, upz;
 
 	void copyStruct(cameraPos* from, cameraPos* to);
 	
 public:
+	int framesLeft;
 	cameraPos currentPos, toPos, fromPos;
 	GLdouble fovy, width, height, zNear, zFar;	
 	void animate(int frames);

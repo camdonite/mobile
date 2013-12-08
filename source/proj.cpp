@@ -36,8 +36,10 @@ using namespace std;
 static GLbitfield bitmask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 static bool spinning = true;
 static int FPS = 60;
-static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
 picture* lookat;
+
+int pointingToAbyss = 0;
+
 struct timeStat{
 	WORD num;
 	WORD sum;
@@ -133,10 +135,10 @@ void displayDescription() {
 	glTranslatef(lookat->x, lookat->y - height, lookat->z);
 	glRotatef(lookat->angle, 0.0, 1.0, 0.0);
 	glBegin(GL_POLYGON);
-		glVertex3f(width, height - lookat->height * 1.5, 0);	
-		glVertex3f(-width, height - lookat->height * 1.5, 0);
-		glVertex3f(-width, -height*2, 0);
-		glVertex3f(width, -height*2, 0);
+		glVertex3f(width*2, height - lookat->height * 1.5, 0);	
+		glVertex3f(-width*2, height - lookat->height * 1.5, 0);
+		glVertex3f(-width*2, -height*2, 0);
+		glVertex3f(width*2, -height*2, 0);
 	glEnd();
 	glPopMatrix();
 	glColor3f(1, 1, 1);
@@ -162,8 +164,12 @@ void drawTree(treeNode* tree) {
 
 		glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &newClickDepth);
 		//if (newClickDepth != oldClickDepth) {
-		if (newClickDepth < click.lastZ){
+		if (newClickDepth == 1.0) {
+			if (pointingToAbyss == 10) click.lastPic = nullptr;
+			else if (pointingToAbyss < 10) pointingToAbyss++;
+		} else if (newClickDepth < click.lastZ){
 			click.lastPic = tree->pic;
+			pointingToAbyss = 0;
 		}
 		click.lastZ = newClickDepth;
 	} else {
@@ -222,11 +228,11 @@ void redraw(){
 	drawTree(root);
 	cam.touch();
 	if (click.clicked) {
-		tracking = true;
+		if (pointingToAbyss < 10) tracking = true;
 		click.clicked = false;
 	}
 
-	if (tracking) displayDescription();
+	if (tracking && cam.framesLeft < 1) displayDescription();
 	glFlush();
 	glutSwapBuffers();
 }
@@ -266,7 +272,7 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 		}
 		break;
 	case ' ':
-		redraw();
+		if (!spinning) redraw();
 		break;
 	case 's':
 		if (spinning) {
