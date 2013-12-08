@@ -16,12 +16,13 @@ class camera{
 private:
 	bool changed;
 
-	int framesLeft, framesAnimate;
+	
 	GLdouble upx, upy, upz;
 
 	void copyStruct(cameraPos* from, cameraPos* to);
 	
 public:
+	int framesLeft, framesAnimate;
 	cameraPos currentPos, toPos, fromPos;
 	GLdouble fovy, width, height, zNear, zFar;	
 	void animate(int frames);
@@ -37,7 +38,12 @@ public:
 	void setLookat(GLfloat lookatX, GLfloat lookatY, GLfloat lookatZ);
 	void setLookat(cameraPos position);
 	void touch();
-
+	void camera::setPerspective(){
+		gluPerspective(fovy, width/height, zNear, zFar);
+				gluLookAt(currentPos.x, currentPos.y, currentPos.z,
+			  currentPos.lookatX, currentPos.lookatY, currentPos.lookatZ,
+			  upx, upy, upz);
+	}
 	//possibly add FPS controls
 };
 
