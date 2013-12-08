@@ -215,7 +215,7 @@ void drawTree(treeNode* tree) {
 		//glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &oldClickDepth);
 
 		//Render the picture
-		tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle, tree->pic == click.lastPic);
+		if (tree->pic != NULL) tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle, tree->pic == click.lastPic);
 	
 		//Find the new z buffer value at the mouse coord, if it has changed, then this picture is the one the mouse is over
 		GLfloat newClickDepth;
@@ -236,14 +236,19 @@ void drawTree(treeNode* tree) {
 		//draw the sticks
 		glLineWidth(STICK_WIDTH);
 		glBegin(GL_LINES);		
-		glVertex3f(x1, tree->left->ypos, z1);
-		glVertex3f(x1, tree->ypos, z1);
+			if (tree->left != NULL) {
+				glVertex3f(x1, tree->left->ypos, z1);
+				glVertex3f(x1, tree->ypos, z1);
+			}
 
-		glVertex3f(x1, tree->ypos, z1);
-		glVertex3f(x2, tree->ypos, z2);
+			glVertex3f(x1, tree->ypos, z1);
+			glVertex3f(x2, tree->ypos, z2);
 
-		glVertex3f(x2, tree->ypos, z2);
-		glVertex3f(x2, tree->right->ypos, z2);
+		
+			if (tree->right != NULL) {
+				glVertex3f(x2, tree->ypos, z2);
+				glVertex3f(x2, tree->right->ypos, z2);
+			}
 		glEnd();
 
 		//process left subtree
@@ -452,9 +457,10 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 
 	bool hasLeftNode = false;
 	bool hasLeftPic = false;
+	bool nodeNotFull = true;
 	depth += DROP_DISTANCE;
 
-	while (dir.has_next) {
+	while (dir.has_next && nodeNotFull) {
 		tinydir_file file;
 		tinydir_readfile(&dir, &file);
 		if (file.is_dir) {
@@ -462,6 +468,7 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 				if (hasLeftNode)  {//go Right
 					leaf->right = new treeNode(0, depth, 0, 800);
 					searchDirectory(file.path, leaf->right, depth); // Check right
+					nodeNotFull = false;
 				} else { //go Left
 					leaf->left = new treeNode(0, depth, 0, 800);
 					searchDirectory(file.path, leaf->left, depth); // Check left
@@ -477,11 +484,15 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 				sprintf(textPath, "%s/%s%s", path, fileName, ".txt");
 				printf("->Preparing files:\n  %s\n  %s\n\n", file.path, textPath);
 				description = (char*)parseTextFile(textPath);
-				if (hasLeftPic) {
+				if (strcmp(description, "???") == 0) description = fileName;
+				if (hasLeftNode) {
+					if (leaf->right == NULL) leaf->right = new treeNode(0, depth, 0, 800);
 					leaf->right->pic = new picture(file.path, file.name, description);
+					nodeNotFull = false;
 				} else {
+					if (leaf->left == NULL) leaf->left = new treeNode(0, depth, 0, 800);
 					leaf->left->pic = new picture(file.path, file.name, description);
-					hasLeftPic = true;
+					hasLeftNode = true;
 				}
 			}
 			printf("\n");
