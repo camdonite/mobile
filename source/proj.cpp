@@ -603,11 +603,11 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 				//if (strcmp(description, "???") == 0) description = fileName;
 				if (hasLeftNode) {
 					if (leaf->right == NULL) leaf->right = new treeNode(depth, 800);
-					leaf->right->pic = new picture(file.path, file.name, description);
+					leaf->right->pic = new picture(file.path, description);
 					nodeNotFull = false;
 				} else {
 					if (leaf->left == NULL) leaf->left = new treeNode(depth, 800);
-					leaf->left->pic = new picture(file.path, file.name, description);
+					leaf->left->pic = new picture(file.path, description);
 					hasLeftNode = true;
 				}
 			}
@@ -688,7 +688,7 @@ bool loadManifest(const char* manifestFilename){
 #ifdef DEBUG
 			cout<<"pic["<<picCount<<"] filename:"<<filename<<"\n description:"<<description<<"\n";
 #endif
-			pics[picCount] = new picture(filename, "", description);
+			pics[picCount] = new picture(filename, description);
 			if (pics[picCount]->loaded) picCount++;		
 		}
 	}

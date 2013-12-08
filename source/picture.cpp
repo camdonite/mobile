@@ -1,19 +1,7 @@
 //see pictures.h for comments
 #include "picture.h"
 
-//picture::picture(string filename){
-//	picture(filename, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_NAME, DEFAULT_DESCRIPTION);
-//}
-//
-//picture::picture(string filename, string inName, string inDescription){
-//	picture(filename, DEFAULT_WIDTH, DEFAULT_HEIGHT, inName, inDescription);
-//}
-//
-//picture::picture(string filename, GLfloat inWidth = DEFAULT_WIDTH, GLfloat inHeight = DEFAULT_HEIGHT){
-//	picture(filename, inWidth, inHeight, "untitled", DEFAULT_DESCRIPTION);
-//}
-
-picture::picture(string inFilename, string inName, string inDescription){
+picture::picture(string inFilename, string inDescription){
 	if (strcmp(inDescription.c_str(), "") == 0){
 		hasDescription = false;
 	} else {
@@ -23,7 +11,6 @@ picture::picture(string inFilename, string inName, string inDescription){
 #ifdef DEBUG	
 	cout << "->Constructing texture object for " << inFilename << ": Loading...";
 #endif
-	name = string(inName);
 	description = string(inDescription);
 	filename = string(inFilename);
 	
@@ -58,21 +45,19 @@ picture::picture(string inFilename, string inName, string inDescription){
 #ifdef DEBUG
 		cout << "Success!\n";
 		cout << "Picture Information: \n";
-		cout << " - name: " << name << "\n";
 		cout << " - width: " << width << ", height: " << height << "\n";
 		cout << " - description: " << description << "\n\n";
 		cout << "Success!\n";
 #endif
 		loaded = true;
 	}
-	//pause(); //debug
 }
 
 void picture::display(){
 
 	if (loaded) { //doesn't display anything if a pic failed to load
 #ifdef DEBUG_LEVEL2
-		cout << "->displaying pic " << name << "[" << texture << "]! DES:" << description << "\n";
+		cout << "->displaying pic"[" << texture << "]! DES:" << description << "\n";
 #endif
 		//debug
 		//glColor3f(1, 1, 1);

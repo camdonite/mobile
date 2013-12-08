@@ -22,7 +22,6 @@ private:
 public:
 	bool loaded;
 	string filename;
-	string name;
 	string description;
 	bool hasDescription;
 	GLfloat x;
@@ -36,13 +35,13 @@ public:
 	//picture(string filename);
 	//picture(string filename, GLfloat width, GLfloat height);
 	//picture(string filename, string name, string description); //filename, name, description
-	picture(string filename, GLfloat width, GLfloat height, string name = DEFAULT_NAME, string description = DEFAULT_DESCRIPTION){
-		picture(filename, name, description);
+	picture(string filename, GLfloat width, GLfloat height, string description = DEFAULT_DESCRIPTION){
+		picture(filename, description);
 	}
 	//picture(string filename) {
 	//	picture(filename, "", "");
 	//}
-	picture(string filename, string name = DEFAULT_NAME, string description = DEFAULT_DESCRIPTION);
+	picture(string filename, string description = DEFAULT_DESCRIPTION);
 	void display(GLfloat lx, GLfloat ly, GLfloat lz, GLfloat langle, bool lhighlighted = false){
 		x = lx;
 		y = ly;
