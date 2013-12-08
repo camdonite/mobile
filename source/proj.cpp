@@ -106,19 +106,19 @@ struct treeNode{
 	GLfloat angle;
 	GLfloat radius;
 	GLfloat speed;
-	treeNode(GLfloat x, GLfloat y, GLfloat z, GLfloat r){
+	treeNode(GLfloat y, GLfloat r){
 		pic = NULL;
 		right = NULL;
 		left = NULL;
-		xpos = x;
+		xpos = 0.0;
 		ypos = y;
-		zpos = z;
+		zpos = 0.0;
 		angle = 0.0;
 		speed = random();
 		radius = r;
 	}
 	treeNode() {
-		treeNode(0.0, 0.0, 0.0, 0.0);
+		treeNode(0.0, 0.0);
 	}
 };
 treeNode* root;
@@ -328,14 +328,14 @@ void myDisplayCallback(){
 void constructRandomTree(){
 	//construct the tree	
 	const int nodeWidth = 10;
-	root = new treeNode(0, 0, 0, nodeWidth);  // Main root
+	root = new treeNode(0, nodeWidth);  // Main root
 	//nodeWidth /= 2;
 	//add the first pic
-	root->left = new treeNode(0, DROP_DISTANCE, 0, nodeWidth);
+	root->left = new treeNode(DROP_DISTANCE, nodeWidth);
 	root->left->pic = pics[0];
 	root->radius += pics[0]->width;
 	//add the second pic
-	root->right = new treeNode(0, DROP_DISTANCE, 0, nodeWidth);
+	root->right = new treeNode(DROP_DISTANCE, nodeWidth);
 	root->right->pic = pics[1];
 	root->radius += pics[1]->width;
 
@@ -362,13 +362,13 @@ void constructRandomTree(){
 			} else {
 				//Found a leaf. Replace leaf with node, and move the found pic to the left.
 				//picture* tempPic = leafNode->pic;
-				leafNode->left = new treeNode(0, DROP_DISTANCE * treeHeight, 0, nodeWidth);
+				leafNode->left = new treeNode(DROP_DISTANCE * treeHeight, nodeWidth);
 				leafNode->radius += leafNode->pic->width / 2;
 				leafNode->left->pic = leafNode->pic;
 				leafNode->pic = NULL;
 				
 				//Add current pics[i] to right side
-				leafNode->right = new treeNode(0, DROP_DISTANCE * treeHeight, 0, nodeWidth);
+				leafNode->right = new treeNode(DROP_DISTANCE * treeHeight, nodeWidth);
 				leafNode->right->pic = pics[i];
 				leafNotFound = false;
 			}
@@ -582,11 +582,11 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 		if (file.is_dir) {
 			if (strcmp(file.name, ".") != 0 && strcmp(file.name, "..") != 0) {
 				if (hasLeftNode)  {//go Right
-					leaf->right = new treeNode(0, depth, 0, 800);
+					leaf->right = new treeNode(depth, 800);
 					searchDirectory(file.path, leaf->right, depth); // Check right
 					nodeNotFull = false;
 				} else { //go Left
-					leaf->left = new treeNode(0, depth, 0, 800);
+					leaf->left = new treeNode(depth, 800);
 					searchDirectory(file.path, leaf->left, depth); // Check left
 					hasLeftNode = true;
 				}
@@ -602,11 +602,11 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 				description = (char*)parseTextFile(textPath);
 				//if (strcmp(description, "???") == 0) description = fileName;
 				if (hasLeftNode) {
-					if (leaf->right == NULL) leaf->right = new treeNode(0, depth, 0, 800);
+					if (leaf->right == NULL) leaf->right = new treeNode(depth, 800);
 					leaf->right->pic = new picture(file.path, file.name, description);
 					nodeNotFull = false;
 				} else {
-					if (leaf->left == NULL) leaf->left = new treeNode(0, depth, 0, 800);
+					if (leaf->left == NULL) leaf->left = new treeNode(depth, 800);
 					leaf->left->pic = new picture(file.path, file.name, description);
 					hasLeftNode = true;
 				}
@@ -620,12 +620,12 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 	tinydir_close(&dir);
 }
 void constructMobileTree() {
-	root = new treeNode(0, 0, 0, 2000);  // Main root
+	root = new treeNode(0, 2000);  // Main root
 
-	root->left = new treeNode(0, DROP_DISTANCE, 0, 800); // Left child
+	root->left = new treeNode(DROP_DISTANCE, 800); // Left child
 	searchDirectory(NODE_FOLDER_1, root->left, DROP_DISTANCE); //Check left
 
-	root->right = new treeNode(0, DROP_DISTANCE, 0, 800); // Right child
+	root->right = new treeNode(DROP_DISTANCE, 800); // Right child
 	searchDirectory(NODE_FOLDER_2, root->right, DROP_DISTANCE); // Check right
 }
 bool loadFolder(const char* path){
