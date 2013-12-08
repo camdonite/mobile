@@ -38,13 +38,22 @@ static bool spinning = true;
 static int FPS = 60;
 static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
 picture* lookat;
+struct timeStat{
+	WORD num;
+	WORD sum;
+	timeStat(){
+		num = 0;
+		sum = 0;
+	}
+};
+timeStat timestat;
+
 
 GLfloat random(){
 	GLfloat out = ((GLfloat) rand() / RAND_MAX) * (SPEED_RANGE * 2) - SPEED_RANGE;
 	cout<<"->Random:"<<out<<"\n";
 	return out;
 }
-
 struct mouseClick{
 	bool clicked;
 	int x;
@@ -107,7 +116,6 @@ void reshape(int w, int h){
 void resetCamera() {
 	cam.set(initialPos, true);
 }
-
 void track(){
 	cam.set(lookat->x - (1200 * sin(toRadian(lookat->angle + 180 + WOBBLE))),
 			lookat->y - lookat->height,
@@ -141,20 +149,23 @@ void drawTree(treeNode* tree) {
 	//This is all recursive up in here!
 	if (tree->pic) {
 		//leaf(with picture)
-		GLfloat oldClickDepth;
+		//GLfloat oldClickDepth;
 
 		//Find the current z buffer value at the mouse coord
-		glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &oldClickDepth);
+		//glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &oldClickDepth);
 
 		//Render the picture
 		tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle, tree->pic == click.lastPic);
 	
 		//Find the new z buffer value at the mouse coord, if it has changed, then this picture is the one the mouse is over
 		GLfloat newClickDepth;
+
 		glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &newClickDepth);
-		if (newClickDepth != oldClickDepth) {
+		//if (newClickDepth != oldClickDepth) {
+		if (newClickDepth < click.lastZ){
 			click.lastPic = tree->pic;
 		}
+		click.lastZ = newClickDepth;
 	} else {
 		GLfloat x1 = tree->xpos + (cos(toRadian(tree->angle)) * tree->radius);
 		GLfloat z1 = tree->zpos + (sin(toRadian(tree->angle)) * tree->radius);
@@ -214,6 +225,7 @@ void redraw(){
 		tracking = true;
 		click.clicked = false;
 	}
+
 	if (tracking) displayDescription();
 	glFlush();
 	glutSwapBuffers();
@@ -224,6 +236,11 @@ void myDisplayCallback(){
 }
 void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 	switch (key) {
+	case 't':
+		cout << "Avg render time of last " << timestat.num << " frames is " << (timestat.sum / timestat.num) << " milliseconds.\n";
+		timestat.sum = 0;
+		timestat.num = 0;
+		break;
 	case '+':
 		FPS += 10;
 	case '-':
@@ -300,8 +317,20 @@ void myInit(){
 	cam.touch();
 }
 void timer(int v) {
+	//get time before render
+	SYSTEMTIME before, after;
+	GetSystemTime(&before);
+
 	if (spinning) redraw();
-	glutTimerFunc(1000/FPS, timer, v);
+
+	//get time after render
+	GetSystemTime(&after);
+	WORD frameTime = after.wMilliseconds - before.wMilliseconds;
+	if (before.wSecond < after.wSecond) frameTime += 1000; //in case frame renders over a second boundry
+	timestat.sum += frameTime;
+	timestat.num ++;
+
+	glutTimerFunc(1000/FPS, timer, v);	
 }
 void passiveMove(int cursorX, int cursorY) {
 	if (!tracking) {
@@ -312,7 +341,6 @@ void passiveMove(int cursorX, int cursorY) {
 void mouseMovement(int cursorX, int cursorY) {
 	// No use yet
 }
-
 char* parseTextFile(const char *path) {
 	string text;
 	string temp;
@@ -334,7 +362,6 @@ char* parseTextFile(const char *path) {
 	
 	return "???";
 }
-
 void printDirectory(const char *path) {
 	tinydir_dir dir;
 	tinydir_open(&dir, path);
@@ -354,7 +381,6 @@ void printDirectory(const char *path) {
 	}
 	tinydir_close(&dir);
 }
-
 void searchDirectory(const char *path, treeNode *leaf, float depth) {
 	tinydir_dir dir;
 	tinydir_open(&dir, path);
@@ -399,7 +425,6 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 	}
 	tinydir_close(&dir);
 }
-
 void constructMobileTree() {
 	root = new treeNode(0, 0, 0, 2000);  // Main root
 
@@ -409,7 +434,6 @@ void constructMobileTree() {
 	root->right = new treeNode(0, -100, 0, 800); // Right child
 	searchDirectory(NODE_FOLDER_2, root->right, DROP_DISTANCE); // Check right
 }
-
 void main(int argc, char ** argv){
 	//initialize glut and openGL
 	glutInit(& argc, argv);
