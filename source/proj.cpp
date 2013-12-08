@@ -28,9 +28,11 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #define DEFAULT_MANIFEST "C:\\temp\\project\\manifest.txt"
 #define SPEED_RANGE 0.5
 #define WOBBLE 2
-#define DROP_DISTANCE -400  // For the mobile drop distance for each hanging/raised(if > 0) piece
+#define DROP_DISTANCE -100  // For the mobile drop distance for each hanging/raised(if > 0) piece
 #define NODE_FOLDER_1 "../../../mobiletree/1"
 #define NODE_FOLDER_2 "../../../mobiletree/2"
+#define FONT GLUT_BITMAP_TIMES_ROMAN_24
+#define FONT_HEIGHT 50 //space between lines
 using namespace std;
 
 static GLbitfield bitmask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
@@ -122,28 +124,65 @@ void track(){
 			lookat->z - (1200 * cos(toRadian(lookat->angle + 180 - WOBBLE))),
 			lookat->x, lookat->y - lookat->height, lookat->z, false);
 }
-void displayDescription() {
+void displayDescriptionNew() {
+	//Set the matricies to absolute coords
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	//Set blending functions
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
-	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glColor4f(0, 0, 0, 0.6);
-	glPushMatrix();
-	glTranslatef(lookat->x, lookat->y - height, lookat->z);
-	glRotatef(lookat->angle, 0.0, 1.0, 0.0);
+
+	//render the semi-transparent background
 	glBegin(GL_POLYGON);
-		glVertex3f(width, height - lookat->height * 1.5, 0);	
-		glVertex3f(-width, height - lookat->height * 1.5, 0);
-		glVertex3f(-width, -height*2, 0);
-		glVertex3f(width, -height*2, 0);
+		glVertex3f(-1, 0, 0);	
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, -1, 0);
+		glVertex3f(-1, -1, 0);
 	glEnd();
-	glPopMatrix();
+
+	//render the text
 	glColor3f(1, 1, 1);
-	renderBitmapString(lookat->x, lookat->y - lookat->height * 2, lookat->z, GLUT_BITMAP_TIMES_ROMAN_24, lookat->description);
-	
+	renderBitmapString(-1, 0, 0, FONT, lookat->description, FONT_HEIGHT / cam.height);
+
+	//reset blending
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+	
+	//reset the matricies
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+}
+void displayDescription() {
+        glEnable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
+        
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glColor4f(0, 0, 0, 0.6);
+        glPushMatrix();
+        glTranslatef(lookat->x, lookat->y - height, lookat->z);
+        glRotatef(lookat->angle, 0.0, 1.0, 0.0);
+        glBegin(GL_POLYGON);
+                glVertex3f(width, height - lookat->height * 1.5, 0);        
+                glVertex3f(-width, height - lookat->height * 1.5, 0);
+                glVertex3f(-width, -height*2, 0);
+                glVertex3f(width, -height*2, 0);
+        glEnd();
+        glPopMatrix();
+        glColor3f(1, 1, 1);
+        renderBitmapString(lookat->x, lookat->y - lookat->height * 2, lookat->z, GLUT_BITMAP_TIMES_ROMAN_24, lookat->description);
+        
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
 }
 void drawTree(treeNode* tree) {	
 	//This is all recursive up in here!
@@ -226,7 +265,11 @@ void redraw(){
 		click.clicked = false;
 	}
 
-	if (tracking) displayDescription();
+	if (tracking) {
+		//displayDescription();
+		displayDescriptionNew();
+	}
+
 	glFlush();
 	glutSwapBuffers();
 }
@@ -317,13 +360,11 @@ void myInit(){
 	cam.touch();
 }
 void timer(int v) {
-	//get time before render
 	SYSTEMTIME before, after;
 	GetSystemTime(&before);
 
 	if (spinning) redraw();
 
-	//get time after render
 	GetSystemTime(&after);
 	WORD frameTime = after.wMilliseconds - before.wMilliseconds;
 	if (before.wSecond < after.wSecond) frameTime += 1000; //in case frame renders over a second boundry
@@ -349,8 +390,9 @@ char* parseTextFile(const char *path) {
 	file.open (path);
 	if (file.is_open()) {
 		while (!file.eof()) {
-			getline (file, temp);
-			text.append (temp);
+			getline(file, temp);
+			text.append(temp);
+			text.append("\n");
 		}
 		file.close();
 		char * ret = new char[strlen(text.c_str())+1]();
