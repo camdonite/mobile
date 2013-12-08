@@ -56,6 +56,7 @@ static int currentChars = 0;
 static int framesSinceLastChar = 0;
 static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
 picture* lookat;
+int pointingToAbyss = 0;
 struct timeStat{
 	WORD num;
 	WORD sum;
@@ -224,7 +225,12 @@ void drawTree(treeNode* tree) {
 
 		glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &newClickDepth);
 		//if (newClickDepth != oldClickDepth) {
-		if (newClickDepth < click.lastZ){
+		//if (newClickDepth < click.lastZ){
+		if (newClickDepth == 1.0) {
+			if (pointingToAbyss == 10) click.lastPic = nullptr;
+			else if (pointingToAbyss < 10) pointingToAbyss++;
+		} else if (newClickDepth < click.lastZ){
+			pointingToAbyss = 0;
 			click.lastPic = tree->pic;
 		}
 		click.lastZ = newClickDepth;
@@ -278,6 +284,7 @@ void drawTree(treeNode* tree) {
 }
 void redraw(){
 	glClear(bitmask);
+	//click.lastPic = nullptr;
 
 	if (tracking) track();
 	
