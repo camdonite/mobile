@@ -49,10 +49,10 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #define FONT GLUT_BITMAP_TIMES_ROMAN_24
 #define DROP_DISTANCE -230  // For the mobile drop distance for each hanging/raised(if > 0) piece
 
-bool showHelp = false,
+bool //showHelp = false,
 	 showCoords = true,
 	 tracking = false,
-	 manifest = false,
+	 definedTree = false,
 	 spinning = true;
 
 using namespace std;
@@ -61,9 +61,10 @@ static GLbitfield bitmask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 static int FPS = 60;
 static int currentChars = 0;
 static int framesSinceLastChar = 0;
-static GLfloat currentAngleOfRotation[4] = { 0, 30, 90, 180 };
+
 picture* lookat;
 int pointingToAbyss = 0;
+
 struct timeStat{
 	WORD num;
 	WORD sum;
@@ -77,10 +78,6 @@ GLfloat random(){
 	GLfloat out = ((GLfloat) rand() / RAND_MAX) * (SPEED_RANGE * 2) - SPEED_RANGE;
 	cout<<"->Random:"<<out<<"\n";
 	return out;
-}
-bool coinFlip(){
-	//returns true or false
-	return (rand() % 2) == 0;
 }
 
 struct mouseClick{
@@ -124,13 +121,12 @@ struct treeNode{
 		treeNode(0.0, 0.0, 0.0, 0.0);
 	}
 };
-
 treeNode* root;
 
 //camera stuff
 int height = 600,
-	width  = 1000,
-	depth = 600;
+	width  = 1000;
+const int depth = 600;
 double distanceMultiplier = 5;
 camera cam(70.0, 1000, 600, 1, depth*distanceMultiplier*1000); //initalize the camera object
 cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
@@ -312,9 +308,14 @@ void redraw(){
 		framesSinceLastChar = 0;
 	}
 
-	if (tracking && cam.framesLeft <= 0 && lookat->hasDescription) {
-		//displayDescription();
-		displayDescriptionNew();
+	if (tracking && cam.framesLeft <= 0){
+		if (lookat->hasDescription) {
+			//displayDescription();
+			displayDescriptionNew();
+		}
+		glDisable(GL_DEPTH_TEST);
+		lookat->display();
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	glFlush();
@@ -394,7 +395,7 @@ void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
 		}
 		break;
 	case 'r':
-		if (manifest) constructRandomTree();
+		if (!definedTree) constructRandomTree();
 		break;
 	case 't':
 		cout << "Avg render time of last " << timestat.num << " frames is " << (timestat.sum / timestat.num) << " milliseconds.\n";
@@ -627,6 +628,21 @@ void constructMobileTree() {
 	root->right = new treeNode(0, DROP_DISTANCE, 0, 800); // Right child
 	searchDirectory(NODE_FOLDER_2, root->right, DROP_DISTANCE); // Check right
 }
+bool loadFolder(const char* path){
+	tinydir_dir dir;
+	tinydir_open(&dir, path);
+	while (dir.has_next) {
+		tinydir_file file;
+		tinydir_readfile(&dir, &file);
+		if (!file.is_dir) {
+			pics[picCount] = new picture(file.path);
+			if (pics[picCount]->loaded) picCount ++;
+		}
+		tinydir_next(&dir);
+	}
+	if (picCount > 0) return true; else return false;
+	tinydir_close(&dir);
+}
 bool loadManifest(const char* manifestFilename){
 	/* Loads the configuration data from the manifest file. 
 	 * See example manifest.txt for more deets
@@ -637,9 +653,7 @@ bool loadManifest(const char* manifestFilename){
 	ifstream file;
 	file.open(manifestFilename);
 	if (file.fail()) {
-#ifdef DEBUG
-		cout<<"no manifest file found. Defaulting to folder mode.\n";
-#endif
+
 		return false;
 	}
 	string filename = "";
@@ -704,12 +718,20 @@ void main(int argc, char ** argv){
 	click.clicked = false;
 	//loadHardTree();
 	//constructMobileTree();
-	if (loadManifest("C:\\temp\\project\\manifest.txt")){
-		constructRandomTree();
-		manifest = true;
-	} else {
-		constructMobileTree();
-	}
+	loadFolder("c:\\temp\\project\\pics");
+	constructRandomTree();
+//	if (loadManifest("C:\\temp\\project\\manifest.txt")){
+//		constructRandomTree();
+//		manifest = true;
+//	} else {
+//#ifdef DEBUG
+//		cout<<"no manifest file found. Defaulting to folder mode.\n";
+//#endif
+//		//constructMobileTree();
+//		loadFolder("c:\\temp\\project\\pics");
+//		constructRandomTree();
+//		definedTree = true;
+//	}
 
 	initialPos.z = root->radius * 2;
 	cam.setPos(initialPos);

@@ -22,6 +22,8 @@ using namespace std;
 
 void pause();
 
+bool coinFlip();
+
 double toDegree(double);
 //converts radains to degrees
 
