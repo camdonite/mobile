@@ -309,13 +309,13 @@ void redraw(){
 	}
 
 	if (tracking && cam.framesLeft <= 0){
+		glDisable(GL_DEPTH_TEST);
+		lookat->display();
+		glEnable(GL_DEPTH_TEST);		
 		if (lookat->hasDescription) {
 			//displayDescription();
 			displayDescriptionNew();
 		}
-		glDisable(GL_DEPTH_TEST);
-		lookat->display();
-		glEnable(GL_DEPTH_TEST);
 	}
 
 	glFlush();
@@ -548,25 +548,6 @@ char* parseTextFile(const char *path) {
 	
 	return "";
 }
-void printDirectory(const char *path) {
-	tinydir_dir dir;
-	tinydir_open(&dir, path);
-
-	while (dir.has_next) {
-		tinydir_file file;
-		tinydir_readfile(&dir, &file);
-		if (file.is_dir) {
-			if (strcmp(file.name, ".") != 0 && strcmp(file.name, "..") != 0) {
-				cout << file.name << "/\n";
-				printDirectory(file.path);
-			}
-		} else {
-			cout << file.name << "\n";
-		}
-		tinydir_next(&dir);
-	}
-	tinydir_close(&dir);
-}
 void searchDirectory(const char *path, treeNode *leaf, float depth) {
 	tinydir_dir dir;
 	tinydir_open(&dir, path);
@@ -598,23 +579,28 @@ void searchDirectory(const char *path, treeNode *leaf, float depth) {
 			sscanf(file.name, "%[^.].%s", fileName, extension);
 			if (strcmp(extension, "txt") != 0) {
 				sprintf(textPath, "%s/%s%s", path, fileName, ".txt");
+#ifdef DEBUG
 				printf("->Preparing files:\n  %s\n  %s\n\n", file.path, textPath);
+#endif
 				description = (char*)parseTextFile(textPath);
-				//if (strcmp(description, "???") == 0) description = fileName;
-				if (hasLeftNode) {
+				if (hasLeftNode) {				
 					if (leaf->right == NULL) leaf->right = new treeNode(depth, 800);
-					leaf->right->pic = new picture(file.path, description);
+					pics[picCount] = new picture(file.path, description);
+					leaf->right->pic = pics[picCount];
+					if (pics[picCount]->loaded) picCount ++;
 					nodeNotFull = false;
 				} else {
 					if (leaf->left == NULL) leaf->left = new treeNode(depth, 800);
-					leaf->left->pic = new picture(file.path, description);
+					pics[picCount] = new picture(file.path, description);
+					leaf->left->pic = pics[picCount];
+					if (pics[picCount]->loaded) picCount ++;
 					hasLeftNode = true;
 				}
 			}
-			
+#ifdef DEBUG			
 			printf("\n");
-		}
-		
+#endif
+		}	
 		tinydir_next(&dir);
 	}
 	tinydir_close(&dir);
@@ -717,9 +703,9 @@ void main(int argc, char ** argv){
 
 	click.clicked = false;
 	//loadHardTree();
-	//constructMobileTree();
-	loadFolder("c:\\temp\\project\\pics");
-	constructRandomTree();
+	constructMobileTree();
+	//loadFolder("c:\\temp\\project\\pics");
+	//constructRandomTree();
 //	if (loadManifest("C:\\temp\\project\\manifest.txt")){
 //		constructRandomTree();
 //		manifest = true;

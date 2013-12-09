@@ -13,15 +13,10 @@ struct cameraPos{
 
 class camera{
 	//this is a singleton
-private:
-	bool changed;
-
-	
-	GLdouble upx, upy, upz;
-
-	void copyStruct(cameraPos* from, cameraPos* to);
-	
 public:
+	bool changed;
+	GLdouble upx, upy, upz;
+	void copyStruct(cameraPos* from, cameraPos* to);
 	int framesLeft, framesAnimate;
 	cameraPos currentPos, toPos, fromPos;
 	GLdouble fovy, width, height, zNear, zFar;	

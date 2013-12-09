@@ -1,9 +1,6 @@
 #ifndef PICTURE_H
 #define PICTURE_H
 
-#define DEFAULT_WIDTH 600
-#define DEFAULT_HEIGHT 600
-#define DEFAULT_NAME "untitled"
 #define DEFAULT_DESCRIPTION ""
 #include "helpers.h"
 class picture{
@@ -12,14 +9,12 @@ class picture{
 	 * display(x, y, z, angle, [selected]) renders the image on the screen at the coords
 	 * and rotated at the specifyed angle(about it's own center)
 	 */
-private:
+public:
 
 	GLuint loadTexture(string);
-	float texWidth;
-	float texHeight;
+	GLfloat texWidth;
+	GLfloat texHeight;
 	GLuint texture;
-	
-public:
 	bool loaded;
 	string filename;
 	string description;
@@ -31,17 +26,12 @@ public:
 	GLfloat width;
 	GLfloat height;
 	bool highlighted;
-	//constructors
-	//picture(string filename);
-	//picture(string filename, GLfloat width, GLfloat height);
-	//picture(string filename, string name, string description); //filename, name, description
-	picture(string filename, GLfloat width, GLfloat height, string description = DEFAULT_DESCRIPTION){
-		picture(filename, description);
+	//constructors.
+	picture(string filename, GLfloat inWidth, GLfloat inHeight, string description = DEFAULT_DESCRIPTION);
+
+	picture(string filename, string description = DEFAULT_DESCRIPTION){
+		picture(filename, 0, 0, description);
 	}
-	//picture(string filename) {
-	//	picture(filename, "", "");
-	//}
-	picture(string filename, string description = DEFAULT_DESCRIPTION);
 	void display(GLfloat lx, GLfloat ly, GLfloat lz, GLfloat langle, bool lhighlighted = false){
 		x = lx;
 		y = ly;

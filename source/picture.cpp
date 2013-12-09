@@ -1,7 +1,7 @@
 //see pictures.h for comments
 #include "picture.h"
 
-picture::picture(string inFilename, string inDescription){
+picture::picture(string inFilename, GLfloat inWidth, GLfloat inHeight, string inDescription){
 	if (strcmp(inDescription.c_str(), "") == 0){
 		hasDescription = false;
 	} else {
@@ -14,9 +14,10 @@ picture::picture(string inFilename, string inDescription){
 	description = string(inDescription);
 	filename = string(inFilename);
 	
+	width = inWidth;
+	height = inHeight;
+
 	loaded = false;
-	//width = inWidth;
-	//height = inHeight;
 	x = 0;
 	y = 0;
 	z = 0;
@@ -38,10 +39,12 @@ picture::picture(string inFilename, string inDescription){
 		img = SOIL_load_image(filename.c_str(), &w, &h, &channels, SOIL_LOAD_AUTO);
 		SOIL_free_image_data(img);
 
+		texWidth = w;
+		texHeight = h;
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		width = w;
-		height = h;
+		if (width == 0) width = texWidth;
+		if (height == 0) height = texHeight;
 #ifdef DEBUG
 		cout << "Success!\n";
 		cout << "Picture Information: \n";
@@ -54,18 +57,7 @@ picture::picture(string inFilename, string inDescription){
 }
 
 void picture::display(){
-
 	if (loaded) { //doesn't display anything if a pic failed to load
-#ifdef DEBUG_LEVEL2
-		cout << "->displaying pic"[" << texture << "]! DES:" << description << "\n";
-#endif
-		//debug
-		//glColor3f(1, 1, 1);
-		//glBegin(GL_LINES);
-		//	glVertex3f(x, y - height, z);
-		//	glVertex3f(x - (1500 * cos(toRadian(angle))), y - height, z - (1500 * sin(toRadian(angle))));
-		//glEnd();
-
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glMatrixMode(GL_MODELVIEW);
