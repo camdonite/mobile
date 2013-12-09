@@ -44,8 +44,8 @@ This is an issue with a 3rd party library we used(tiny_dir.h)
 #define DEFAULT_FRAMERATE 60
 
 //style properties
+//#define VIEW_LOOKAT_MULTIPLIER -.8
 #define VIEW_DISTANCE_MULTIPLIER 2
-#define VIEW_LOOKAT_MULTIPLIER -.8
 #define VIEW_ANGLE -.2
 #define STICK_COLOR 1, .5, 0
 #define STICK_WIDTH 3
@@ -64,6 +64,13 @@ This is an issue with a 3rd party library we used(tiny_dir.h)
 int height = 600,
 	width  = 1000;
 
+//camera stuff
+const int depth = 600;
+double distanceMultiplier = 5;
+camera cam(70.0, 1000, 600, 1, depth*distanceMultiplier*1000); //initalize the camera object
+//cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
+cameraPos initialPos = {0, 0, depth*distanceMultiplier*1.5, 0, -1000, 0};
+
 bool //showHelp = false,
 	 showCoords = false,
 	 tracking = false,
@@ -80,14 +87,8 @@ static int currentChars = 0;
 static int framesSinceLastChar = 0;
 
 picture* lookat;
+picture* selected;
 int pointingToAbyss = 0;
-
-//camera stuff
-const int depth = 600;
-double distanceMultiplier = 5;
-camera cam(70.0, 1000, 600, 1, depth*distanceMultiplier*1000); //initalize the camera object
-//cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
-cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, 0, 0};
 
 int picCount = 0,
 	picLookat = -1;
@@ -216,27 +217,19 @@ void drawTree(treeNode* tree) {
 	//This is all recursive up in here!
 	if (tree->pic) {
 		//leaf(with picture)
-		//GLfloat oldClickDepth;
-
-		//Find the current z buffer value at the mouse coord
-		//glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &oldClickDepth);
-
 		//Render the picture
-		if (tree->pic != NULL) tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle, tree->pic == click.lastPic);
+		if (tree->pic != NULL) tree->pic->display(tree->xpos, tree->ypos, tree->zpos, tree->angle, tree->pic == selected);
 	
 		//Find the new z buffer value at the mouse coord, if it has changed, then this picture is the one the mouse is over
 		GLfloat newClickDepth;
-
 		glReadPixels(click.x, click.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &newClickDepth);
-		//if (newClickDepth != oldClickDepth) {
-		//if (newClickDepth < click.lastZ){
-		if (newClickDepth == 1.0) {
-			if (pointingToAbyss == picCount + 1) click.lastPic = nullptr;
-			else if (pointingToAbyss < picCount + 1) pointingToAbyss++;
-		} else if (newClickDepth < click.lastZ){
-			pointingToAbyss = 0;
+		//cout<<newClickDepth<<":"<<click.lastZ<<"|lookat"<<click.lastPic<<"\n";
+		if (newClickDepth < click.lastZ) {
 			click.lastPic = tree->pic;
+			click.lastZ = newClickDepth;
 		}
+		//cout<<newClickDepth<<":"<<click.lastZ<<"|lookat"<<click.lastPic<<"\n";
+  
 		click.lastZ = newClickDepth;
 	} else {
 		GLfloat x1 = tree->xpos + (cos(toRadian(tree->angle)) * tree->radius);
@@ -255,8 +248,7 @@ void drawTree(treeNode* tree) {
 
 			glVertex3f(x1, tree->ypos, z1);
 			glVertex3f(x2, tree->ypos, z2);
-
-		
+	
 			if (tree->right != NULL) {
 				glVertex3f(x2, tree->ypos, z2);
 				glVertex3f(x2, tree->right->ypos, z2);
@@ -275,7 +267,6 @@ void drawTree(treeNode* tree) {
 			tree->right->zpos = z2;
 			drawTree(tree->right);
 		}
-
 	}
 	tree->angle += tree->speed; //add speed to the angle each fram
 	//check for angle overflow
@@ -297,7 +288,16 @@ void redraw(){
 	
 	if (showCoords) coordinates(1000);
 
+	click.lastZ = 1; // 1 is the abyss
+	
 	drawTree(root);
+	
+	if (click.lastZ == 1) {
+		selected = nullptr;
+	} else {
+		selected = click.lastPic;
+	}
+
 	cam.touch();
 	if (click.clicked) {
 		tracking = true;
@@ -314,7 +314,6 @@ void redraw(){
 			displayDescription();
 		}
 	}
-
 	glFlush();
 	glutSwapBuffers();
 }
@@ -742,8 +741,11 @@ void main(int argc, char ** argv){
 	}
 	initialPos.z = root->radius * VIEW_DISTANCE_MULTIPLIER;
 	
-	initialPos.lookatY = root->radius * VIEW_LOOKAT_MULTIPLIER;
+	//initialPos.lookatY = root->radius * VIEW_LOOKAT_MULTIPLIER;
 	initialPos.y = initialPos.lookatY + (root->radius * VIEW_ANGLE);
+	
+	//initialPos.lookatY = VIEW_LOOKAT_Y;
+	//initialPos.y = VIEW_Y;
 	
 	cam.set(initialPos);
 

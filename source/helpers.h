@@ -6,6 +6,7 @@
 #define HELPERS_H
 
 #define DEBUG //remove to disable messages
+#define BENCHMARK
 
 #define _USE_MATH_DEFINES
 using namespace std;
