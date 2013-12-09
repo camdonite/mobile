@@ -28,21 +28,8 @@ public:
 	GLfloat width;
 	GLfloat height;
 	bool highlighted;
-	//constructors.
+	//constructor.
 	picture(string filename, string description = DEFAULT_DESCRIPTION, GLfloat inWidth = DEFAULT_WIDTH, GLfloat inHeight = DEFAULT_HEIGHT);
-
-	//picture(string filename, string description = DEFAULT_DESCRIPTION){
-	//	
-
-	//	picture(filename, 0, 0, description);
-	//	cout<<"overloaded w:"<<width<<" h:"<<height<<"\n";
-	//}
-
-	//picture(string filename, GLfloat inWidth, GLfloat inHeight, string description = DEFAULT_DESCRIPTION){
-	//	picture(filename, description);
-	//}
-
-	//picture(string filename, string description = DEFAULT_DESCRIPTION);
 
 	void display(GLfloat lx, GLfloat ly, GLfloat lz, GLfloat langle, bool lhighlighted = false){
 		x = lx;

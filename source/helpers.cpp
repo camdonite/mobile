@@ -5,25 +5,6 @@ bool coinFlip(){
 	//returns true or false
 	return (rand() % 2) == 0;
 }
-void pause(){
-	int in;
-	cin>>in;
-}
-struct color{
-	GLfloat red;
-	GLfloat green;
-	GLfloat blue;
-	color() {
-		red = 0.0;
-		green = 0.0;
-		blue = 0.0;
-	}
-	color(GLfloat r, GLfloat g, GLfloat b){
-		red = r;
-		green = g;
-		blue = b;
-	}
-};
 double toRadian(double in){
 	return in * M_PI / 180;
 }
