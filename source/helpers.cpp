@@ -1,6 +1,10 @@
 //see helpers.h for comments
 #include "helpers.h"
 
+bool coinFlip(){
+	//returns true or false
+	return (rand() % 2) == 0;
+}
 void pause(){
 	int in;
 	cin>>in;
