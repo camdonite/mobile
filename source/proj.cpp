@@ -26,11 +26,11 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 
 #define editor_title "3D Mobile"
 #define DEFAULT_MANIFEST "C:/temp/project/manifest.txt"
-#define DEFAULT_FOLDER "."
+#define DEFAULT_FOLDER "../../../mobiletree"
 #define DEFAULT_TREE_FOLDER "../../../mobiletree"
 
-#define NODE_FOLDER_1 "../../../mobiletree/1"
-#define NODE_FOLDER_2 "../../../mobiletree/2"
+#define NODE_FOLDER_LEFT "/1"
+#define NODE_FOLDER_RIGHT "/2"
 
 //animation speeds
 #define FLY_SPEED 120 //how many frames the fly to will take
@@ -79,7 +79,8 @@ int pointingToAbyss = 0;
 const int depth = 600;
 double distanceMultiplier = 5;
 camera cam(70.0, 1000, 600, 1, depth*distanceMultiplier*1000); //initalize the camera object
-cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
+//cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, -1500, 0};
+cameraPos initialPos = {0, -500, depth*distanceMultiplier*1.5, 0, 0, 0};
 
 int picCount = 0,
 	picLookat = -1;
@@ -318,14 +319,17 @@ void constructRandomTree(){
 	root = new treeNode(0, nodeWidth);  // Main root
 
 	//add the first pic
-	root->left = new treeNode(DROP_DISTANCE, nodeWidth);
-	root->left->pic = pics[0];
-	root->radius += pics[0]->width;
+	if (picCount > 0) {
+		root->left = new treeNode(DROP_DISTANCE, nodeWidth);
+		root->left->pic = pics[0];
+		root->radius += pics[0]->width;
+	}
 	//add the second pic
-	root->right = new treeNode(DROP_DISTANCE, nodeWidth);
-	root->right->pic = pics[1];
-	root->radius += pics[1]->width;
-
+	if (picCount > 1) {
+		root->right = new treeNode(DROP_DISTANCE, nodeWidth);
+		root->right->pic = pics[1];
+		root->radius += pics[1]->width;
+	}
 	//add the subsequent pics
 	for (int i = 2; i < picCount; i++){
 #ifdef DEBUG
@@ -529,6 +533,7 @@ char* parseTextFile(const char *path) {
 int searchDirectory(const char *path, treeNode *leaf, float depth) {
 	tinydir_dir dir;
 	tinydir_open(&dir, path);
+	if (!dir.has_next) return 0;
 
 	bool hasLeftNode = false;
 	bool hasLeftPic = false;
@@ -586,15 +591,21 @@ int searchDirectory(const char *path, treeNode *leaf, float depth) {
 	tinydir_close(&dir);
 	return leaf->radius;
 }
-bool constructMobileTree(string path) {
+bool constructMobileTree(const char* path) {
 	root = new treeNode(0, NODE_SPACE);  // Main root
 
 	root->left = new treeNode(DROP_DISTANCE, NODE_SPACE); // Left child
-	root->radius += searchDirectory(NODE_FOLDER_1, root->left, DROP_DISTANCE); //Check left
+	string leftFolder = string(path);
+	leftFolder.append(NODE_FOLDER_LEFT);
+	int leftReturn = searchDirectory(leftFolder.c_str(), root->left, DROP_DISTANCE); //Check left
+	root->radius += leftReturn;
 
+	string rightFolder = string(path);
+	rightFolder.append(NODE_FOLDER_RIGHT);
 	root->right = new treeNode(DROP_DISTANCE, NODE_SPACE); // Right child
-	root->radius += searchDirectory(NODE_FOLDER_2, root->right, DROP_DISTANCE); // Check right
-	return true;
+	int rightReturn = searchDirectory(rightFolder.c_str(), root->right, DROP_DISTANCE); // Check right
+	root->radius += rightReturn;
+	return !((leftReturn == 0) && (rightReturn == 0)); //if no sub folders are found, return false
 }
 bool loadFolder(const char* path){
 	tinydir_dir dir;
@@ -676,6 +687,8 @@ void main(int argc, char ** argv){
 
 	srand(time(NULL));
 
+	//constructMobileTree(DEFAULT_TREE_FOLDER);
+
 	if (argc == 1) {
 		if (loadManifest(DEFAULT_MANIFEST)){
 			constructRandomTree();
@@ -692,7 +705,10 @@ void main(int argc, char ** argv){
 			loadFolder(argv[1]);
 			constructRandomTree();
 		}
-
+	}
+	if (picCount <= 0) {
+		cout<<"No pictures found";
+	}
 	initialPos.z = root->radius * 2;
 	cam.setPos(initialPos);
 
