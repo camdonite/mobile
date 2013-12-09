@@ -624,8 +624,22 @@ bool loadFolder(const char* path){
 		tinydir_file file;
 		tinydir_readfile(&dir, &file);
 		if (!file.is_dir) {
-			pics[picCount] = new picture(file.path);
-			if (pics[picCount]->loaded) picCount ++;
+			char fileName[256], extension[20];
+			char textPath[4096];
+			char* description;
+			sscanf(file.name, "%[^.].%s", fileName, extension);
+			if (strcmp(extension, "txt") != 0) {
+				sprintf(textPath, "%s/%s%s", path, fileName, ".txt");
+#ifdef DEBUG
+				printf("->Preparing files:\n  %s\n  %s\n\n", file.path, textPath);
+#endif
+				GLfloat picWidth = 0;
+				GLfloat picHeight = 0;
+				description = (char*)parseTextFile(textPath, &picWidth, &picHeight);
+
+				pics[picCount] = new picture(file.path, description, picWidth, picHeight);
+				if (pics[picCount]->loaded) picCount ++;
+			}
 		}
 		tinydir_next(&dir);
 	}
