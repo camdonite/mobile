@@ -40,6 +40,7 @@ picture::picture(string inFilename, string inDescription, GLfloat inWidth, GLflo
 
 		texWidth = (GLfloat) w;
 		texHeight = (GLfloat) h;
+
 		width = (inWidth == 0) ? w : inWidth;
 		height = (inHeight == 0) ? h : inHeight;
 

@@ -19,8 +19,7 @@ void renderBitmapString(double x, double y, double z, void *font, string str, do
 		if (chars == max) break;
 		chars ++;
 		char chr = *c;
-		if (chr == '_') chr = ' ';
-		if (chr == '\n' || chr == '|') { 
+		if (chr == '\n') { 
 			newlines ++;
 			glRasterPos3d(x,y - (newlines * drop),z);	
 		}else{

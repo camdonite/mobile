@@ -298,9 +298,9 @@ void redraw(){
 	}
 
 	if (tracking && cam.framesLeft <= 0){
-		glDisable(GL_DEPTH_TEST);
-		lookat->display();
-		glEnable(GL_DEPTH_TEST);		
+		//glDisable(GL_DEPTH_TEST);
+		//lookat->display();
+		//glEnable(GL_DEPTH_TEST);		
 		if (lookat->hasDescription) {
 			displayDescription();
 		}
@@ -362,6 +362,7 @@ void constructRandomTree(){
 	}
 }
 void keyboardCallback(unsigned char key, int cursorX, int cursorY) {
+	key = tolower(key);
 	switch (key) {
 	case '.':
 		cam.animate(FLY_SPEED);
@@ -507,14 +508,20 @@ void passiveMove(int cursorX, int cursorY) {
 		click.y = (int) cam.height - cursorY;
 	}
 }
-char* parseTextFile(const char *path) {
+char* parseTextFile(const char *path, GLfloat* inwidth, GLfloat* inheight) {
 	string text;
 	string temp;
   
 	ifstream file;
 	file.open (path);
-	if (file.is_open()) {
+	if (file.is_open()) {		
+		if (file.peek() == '#'){
+			file.get();
+			file>>*inwidth;
+			file>>*inheight;
+		}
 		while (!file.eof()) {
+			
 			getline(file, temp);
 			text.append(temp);
 			text.append("\n");
@@ -565,17 +572,20 @@ int searchDirectory(const char *path, treeNode *leaf, float depth) {
 #ifdef DEBUG
 				printf("->Preparing files:\n  %s\n  %s\n\n", file.path, textPath);
 #endif
-				description = (char*)parseTextFile(textPath);
+				GLfloat picWidth = 0;
+				GLfloat picHeight = 0;
+				description = (char*)parseTextFile(textPath, &picWidth, &picHeight);
+
 				if (hasLeftNode) {				
 					if (leaf->right == NULL) leaf->right = new treeNode(depth, NODE_SPACE);
-					pics[picCount] = new picture(file.path, description);
+					pics[picCount] = new picture(file.path, description, picWidth, picHeight);
 					leaf->right->pic = pics[picCount];
 					leaf->radius += pics[picCount]->width / 2;
 					if (pics[picCount]->loaded) picCount ++;
 					nodeNotFull = false;
 				} else {
 					if (leaf->left == NULL) leaf->left = new treeNode(depth, NODE_SPACE);
-					pics[picCount] = new picture(file.path, description);
+					pics[picCount] = new picture(file.path, description, picWidth, picHeight);
 					leaf->left->pic = pics[picCount];
 					leaf->radius += pics[picCount]->width / 2;
 					if (pics[picCount]->loaded) picCount ++;
