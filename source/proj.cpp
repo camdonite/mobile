@@ -49,6 +49,7 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #define FONT GLUT_BITMAP_TIMES_ROMAN_24
 #define DROP_DISTANCE -230  // For the mobile drop distance for each hanging/raised(if > 0) piece
 
+
 bool //showHelp = false,
 	 showCoords = true,
 	 tracking = false,
@@ -674,7 +675,7 @@ bool loadManifest(const char* manifestFilename){
 #ifdef DEBUG
 			cout<<"pic["<<picCount<<"] filename:"<<filename<<"\n description:"<<description<<"\n";
 #endif
-			pics[picCount] = new picture(filename, description);
+			pics[picCount] = new picture(filename, description, width, height);
 			if (pics[picCount]->loaded) picCount++;		
 		}
 	}
@@ -703,8 +704,8 @@ void main(int argc, char ** argv){
 
 	click.clicked = false;
 	//loadHardTree();
-	constructMobileTree();
-	//loadFolder("c:\\temp\\project\\pics");
+	//constructMobileTree();
+	loadFolder("c:\\temp\\project\\pics");
 	//constructRandomTree();
 //	if (loadManifest("C:\\temp\\project\\manifest.txt")){
 //		constructRandomTree();
@@ -715,7 +716,7 @@ void main(int argc, char ** argv){
 //#endif
 //		//constructMobileTree();
 //		loadFolder("c:\\temp\\project\\pics");
-//		constructRandomTree();
+		constructRandomTree();
 //		definedTree = true;
 //	}
 

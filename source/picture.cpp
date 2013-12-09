@@ -1,7 +1,9 @@
 //see pictures.h for comments
 #include "picture.h"
 
-picture::picture(string inFilename, GLfloat inWidth, GLfloat inHeight, string inDescription){
+picture::picture(string inFilename, string inDescription, GLfloat inWidth, GLfloat inHeight){
+	cout<<"width:"<<inWidth<<" height:"<<inHeight<<"\n";
+
 	if (strcmp(inDescription.c_str(), "") == 0){
 		hasDescription = false;
 	} else {
@@ -13,9 +15,6 @@ picture::picture(string inFilename, GLfloat inWidth, GLfloat inHeight, string in
 #endif
 	description = string(inDescription);
 	filename = string(inFilename);
-	
-	width = inWidth;
-	height = inHeight;
 
 	loaded = false;
 	x = 0;
@@ -39,12 +38,14 @@ picture::picture(string inFilename, GLfloat inWidth, GLfloat inHeight, string in
 		img = SOIL_load_image(filename.c_str(), &w, &h, &channels, SOIL_LOAD_AUTO);
 		SOIL_free_image_data(img);
 
-		texWidth = w;
-		texHeight = h;
+		texWidth = (GLfloat) w;
+		texHeight = (GLfloat) h;
+		width = (inWidth == 0) ? w : inWidth;
+		height = (inHeight == 0) ? h : inHeight;
+
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		if (width == 0) width = texWidth;
-		if (height == 0) height = texHeight;
+
 #ifdef DEBUG
 		cout << "Success!\n";
 		cout << "Picture Information: \n";
@@ -62,7 +63,6 @@ void picture::display(){
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		//glLoadIdentity();
 		glTranslatef(x, y - height, z);
 		glRotatef(angle, 0.0, 1.0, 0.0);
 
