@@ -6,7 +6,7 @@ Term Project
 PROGRAMMER:				Zach Hudson and Chase Coates
 PATH:					
 COURSE:					CSC 525/625
-LAST MODIFIED DATE:		Nov. 22, 2013
+LAST MODIFIED DATE:		Dec. 8, 2013
 DESCRIPTION:			3D Mobile
 NOTE:					N/A
 FILES:					proj.cpp, (hwProject.sln, ...)
@@ -16,6 +16,10 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 2.		Press Ctrl+F7					to COMPILE
 3.		Press Ctrl+Shift+B				to BUILD (COMPILE+LINK)
 4.		Press Ctrl+F5					to EXECUTE
+If you get compile errors, goto
+Project->ProjectProject Properties->Configuration Properties->General->Project Defaults->Character Set
+And make sure that it is on Not Set
+This is an issue with a 3rd party library we used(tiny_dir.h)
 ===================================================================================*/
 
 #include <sstream>
@@ -24,10 +28,10 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #include "camera.h"
 #include "tinydir.h"
 
-#define editor_title "3D Mobile"
-#define DEFAULT_MANIFEST "C:/temp/project/manifest.txt"
-#define DEFAULT_FOLDER "../../../mobiletree"
-#define DEFAULT_TREE_FOLDER "../../../mobiletree"
+#define editor_title "3D Picture Mobile"
+#define DEFAULT_MANIFEST "./manifest.txt"
+#define DEFAULT_FOLDER "./"
+#define DEFAULT_TREE_FOLDER "./mobiletree"
 
 #define NODE_FOLDER_LEFT "/1"
 #define NODE_FOLDER_RIGHT "/2"
@@ -40,7 +44,10 @@ INSTRUCTION FOR COMPILATION AND EXECUTION:
 #define DEFAULT_FRAMERATE 60
 
 //style properties
-#define STICK_COLOR 0, 1, 1
+#define VIEW_DISTANCE_MULTIPLIER 2
+#define VIEW_LOOKAT_MULTIPLIER -.8
+#define VIEW_ANGLE -.2
+#define STICK_COLOR 1, .5, 0
 #define STICK_WIDTH 3
 #define TEXT_COLOR 0, 1, 0
 #define TEXT_BACKGROUND 0, 0, 0, 0.6
@@ -58,7 +65,7 @@ int height = 600,
 	width  = 1000;
 
 bool //showHelp = false,
-	 showCoords = true,
+	 showCoords = false,
 	 tracking = false,
 	 definedTree = false,
 	 spinning = true;
@@ -101,7 +108,9 @@ timeStat timestat;
 GLfloat random(){
 	//Returns a random value based on the defines
 	GLfloat out = ((GLfloat) rand() / RAND_MAX) * (SPEED_RANGE * 2) - SPEED_RANGE;
+#ifdef DEBUG
 	cout<<"->Random:"<<out<<"\n";
+#endif
 	return out;
 }
 
@@ -696,7 +705,6 @@ bool loadManifest(const char* manifestFilename){
 	file.close();
 	return true;
 }
-
 void main(int argc, char ** argv){
 	//initialize glut and openGL
 	glutInit(& argc, argv);
@@ -711,8 +719,7 @@ void main(int argc, char ** argv){
 
 	srand(time(NULL));
 
-	//constructMobileTree(DEFAULT_TREE_FOLDER);
-
+	//figure out what to do
 	if (argc == 1) {
 		if (loadManifest(DEFAULT_MANIFEST)){
 			constructRandomTree();
@@ -733,8 +740,12 @@ void main(int argc, char ** argv){
 	if (picCount <= 0) {
 		cout<<"No pictures found";
 	}
-	initialPos.z = root->radius * 2;
-	cam.setPos(initialPos);
+	initialPos.z = root->radius * VIEW_DISTANCE_MULTIPLIER;
+	
+	initialPos.lookatY = root->radius * VIEW_LOOKAT_MULTIPLIER;
+	initialPos.y = initialPos.lookatY + (root->radius * VIEW_ANGLE);
+	
+	cam.set(initialPos);
 
 	glutKeyboardFunc(keyboardCallback);
 	glutDisplayFunc(myDisplayCallback);		// register a callback

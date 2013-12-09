@@ -2,8 +2,6 @@
 #include "picture.h"
 
 picture::picture(string inFilename, string inDescription, GLfloat inWidth, GLfloat inHeight){
-	cout<<"width:"<<inWidth<<" height:"<<inHeight<<"\n";
-
 	if (strcmp(inDescription.c_str(), "") == 0){
 		hasDescription = false;
 	} else {
